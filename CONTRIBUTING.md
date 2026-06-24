@@ -21,6 +21,30 @@ The marketplace is just [`index.json`](index.json). To list or update a plugin y
 3. Validate it against [`index.schema.json`](index.schema.json) (most editors do this automatically via the `$schema` key). Keep the array sorted by `id`.
 4. Open a pull request.
 
+## Multiple files and bundling
+
+A plugin ships as **one** `main.js`, but you don't have to write it as one file. Split your source into as many modules as you want and **bundle** them into a single ES module before release. The app loads exactly one file (a `data:` URL import can't resolve relative imports), so bundling is how multi-file plugins work, the same model Obsidian and VS Code use.
+
+With [esbuild](https://esbuild.github.io):
+
+```bash
+esbuild src/main.ts --bundle --format=esm --outfile=main.js --minify
+```
+
+That inlines every local `import` into `main.js`. Assets go in the same bundle, no second file to host:
+
+```bash
+# CSS as an injected string, images as data URIs
+esbuild src/main.ts --bundle --format=esm --outfile=main.js \
+  --loader:.css=text --loader:.png=dataurl
+```
+
+Notes:
+
+- **Don't bundle React or the markdown pipeline.** Glyph provides those; when the API hands them to you, mark them `--external:react` (etc.) so there's one copy at runtime. The current API surface is DOM-based and needs no such externals.
+- Keep the output readable enough to review, `--minify` is fine, obfuscation is not (see review criteria).
+- Commit `main.js` to your release (or attach it as a release asset) and point `mainUrl` at that tagged path.
+
 ## Update a plugin
 
 Cut a new release in your repo, then open a PR that bumps **both** `version` and `mainUrl` (to the new tag). Glyph compares the index `version` against what each user has installed and offers an in-app update when they differ.
@@ -42,7 +66,7 @@ A maintainer will check that:
 
 - The entry validates against the schema and the array stays sorted by `id`.
 - `mainUrl` resolves and serves a single ES module that default-exports `{ activate }`.
-- The code is readable (not minified beyond recognition / not obfuscated) so it can be reviewed.
+- The code is readable (not obfuscated) so it can be reviewed.
 - It doesn't bundle its own copy of React or the markdown pipeline (Glyph provides those).
 - The plugin does what its `description` says and nothing surprising.
 
