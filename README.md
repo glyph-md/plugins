@@ -54,4 +54,4 @@ Open a pull request that adds (or bumps) your entry in `index.json`. See [CONTRI
 
 ## Plugin API
 
-Plugins are plain ES modules that default-export `{ activate(ctx) }`. The current API (commands, status bar items, notifications) and a worked sample live in the Glyph repo under [`examples/plugins`](https://github.com/hamidfzm/glyph/tree/main/examples/plugins). The design and roadmap are tracked in [glyph#109](https://github.com/hamidfzm/glyph/issues/109).
+Plugins are plain ES modules that default-export `{ activate(ctx) }`. The context gives a plugin commands, status bar items, notifications, and translations (`ctx.registerTranslations`). A worked sample lives in this repo: [`com.glyph.hello-status/`](com.glyph.hello-status/). The design and roadmap are tracked in [glyph#109](https://github.com/hamidfzm/glyph/issues/109).
