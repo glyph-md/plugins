@@ -4,7 +4,7 @@ The marketplace is just [`index.json`](index.json). To list or update a plugin y
 
 ## Add a plugin
 
-1. Build and publish your plugin in **your own repo**: a single ES module (`main.js`) that default-exports `{ activate(ctx) }`. Tag a release so the file has a stable, immutable URL.
+1. Build and publish your plugin in **your own repo** (start from the [plugin template](https://github.com/glyph-md/plugin-template) — click "Use this template"): a single ES module (`main.js`) that default-exports `{ activate(ctx) }`. Tag a release so the file has a stable, immutable URL.
 2. Fork this repo and add an entry to the `plugins` array in `index.json`:
 
    ```json
