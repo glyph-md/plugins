@@ -56,6 +56,15 @@ ctx.markdown.registerFencedRenderer("d2", ({ code }) => <D2Diagram source={code}
 - Plugin remark/rehype run **after** the built-in pipeline (GFM, math, alerts, wikilinks, sanitize). Plugin code is trusted, so plugin rehype output is not re-sanitized.
 - A fenced renderer handles ` ```<language> ` blocks whose language isn't already built in (mermaid/csv/tsv take precedence). It receives the raw `code` string.
 
+## `ctx.workspace`
+
+Read-only, mediated access to the opened workspace. Requires the plugin manifest to declare the `workspace:read` permission (shown to the user in the install consent prompt). Paths are workspace-relative; anything absolute or escaping the root is rejected, and calls fail when no workspace is open.
+
+```ts
+const files = await ctx.workspace.listFiles();      // absolute paths of workspace markdown files
+const text  = await ctx.workspace.readFile("sub/notes.md");
+```
+
 ## `ctx.notify`
 
 ```ts
@@ -79,4 +88,4 @@ ctx.registerTranslations("de", "myplugin", { greeting: "Hallo" });
 
 ## Not available in v1
 
-No direct filesystem, network, shell, or `invoke` access; no sidebar panels, settings panels, or exporter hooks yet. These are on the [roadmap](https://github.com/hamidfzm/glyph/issues/109).
+No direct network, shell, or `invoke` access; filesystem access only through the permission-gated `ctx.workspace`; no sidebar panels, settings panels, or exporter hooks yet. These are on the 
