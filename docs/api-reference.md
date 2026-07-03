@@ -40,6 +40,58 @@ ctx.ui.addStatusBarItem({
 
 `mount(el, registerCleanup)` is **framework-agnostic**: write into `el` with vanilla DOM, or mount React/Svelte/Vue into it. Register any teardown (timers, listeners, framework unmount) via `registerCleanup`.
 
+## `ctx.ui.addSidebarPanel` (API 1.1)
+
+A titled section rendered in the sidebar below the built-in Outline. Same `mount` contract as status bar items.
+
+```ts
+ctx.ui.addSidebarPanel({
+  id: "my.todos",
+  title: "TODOs",
+  mount(el) { el.textContent = "3 open"; },
+});
+```
+
+## `ctx.ui.addSettingsPanel` (API 1.1)
+
+One settings UI per plugin, shown under your plugin's row in Manage Plugins while it is enabled. Pair it with `ctx.settings` to persist what the user picks.
+
+```ts
+ctx.ui.addSettingsPanel({
+  id: "my.settings",
+  mount(el) {
+    const input = document.createElement("input");
+    input.value = String(ctx.settings.get("size") ?? 12);
+    input.onchange = () => ctx.settings.set("size", Number(input.value));
+    el.append("Font size: ", input);
+  },
+});
+```
+
+## `ctx.settings` (API 1.1)
+
+Per-plugin persisted key-value settings. Hydrated before `activate`, so `get` is synchronous; `set` persists in the background and survives restarts.
+
+```ts
+const size = ctx.settings.get<number>("size") ?? 12;
+ctx.settings.set("size", size + 1);
+```
+
+## `ctx.exporters` (API 1.1)
+
+Contribute an export format. The host runs the shared pipeline (prepares the rendered document, asks for a save location with a derived filename, writes the file); your plugin only turns HTML into file contents (string or `Uint8Array`). It appears in the command palette as "Export: <label>…".
+
+```ts
+ctx.exporters.register({
+  id: "my.slides",
+  label: "reveal.js slides",
+  extension: "html",
+  async build(bodyHtml) {
+    return `<!doctype html><html>…${bodyHtml}…</html>`;
+  },
+});
+```
+
 ## `ctx.markdown`
 
 Extend how documents render.
@@ -86,6 +138,7 @@ ctx.registerTranslations("de", "myplugin", { greeting: "Hallo" });
 - Everything registered through `ctx` is removed automatically on unload.
 - `deactivate()` runs on unload too — use it only for teardown that doesn't go through a `ctx` disposer.
 
-## Not available in v1
+## Not available yet
 
-No direct network, shell, or `invoke` access; filesystem access only through the permission-gated `ctx.workspace`; no sidebar panels, settings panels, or exporter hooks yet. These are on the 
+No direct network, shell, or `invoke` access; filesystem access only through the permission-gated `ctx.workspace`. Per-plugin network gating and a sandboxed plugin type are on the [roadmap](https://github.com/hamidfzm/glyph/issues/109).
+ 
