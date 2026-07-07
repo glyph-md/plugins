@@ -1,0 +1,38 @@
+name: Validate index
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+
+jobs:
+  validate:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v5
+
+      - name: Validate index.json against the schema
+        run: npx --yes ajv-cli@5 validate -s index.schema.json -d index.json --strict=false
+
+      - name: Check entry ordering and URL hygiene
+        run: |
+          node - << 'EOF'
+          const { plugins } = require("./index.json");
+          const ids = plugins.map((p) => p.id);
+          const sorted = [...ids].sort();
+          if (JSON.stringify(ids) !== JSON.stringify(sorted)) {
+            console.error("plugins[] must be sorted by id. Expected order:\n" + sorted.join("\n"));
+            process.exit(1);
+          }
+          if (new Set(ids).size !== ids.length) {
+            console.error("duplicate plugin ids in index.json");
+            process.exit(1);
+          }
+          for (const p of plugins) {
+            if (!p.mainUrl.startsWith("https://")) {
+              console.error(`${p.id}: mainUrl must be https`);
+              process.exit(1);
+            }
+          }
+          console.log(`index.json OK (${ids.length} plugin${ids.length === 1 ? "" : "s"})`);
+          EOF
