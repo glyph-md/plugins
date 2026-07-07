@@ -68,6 +68,14 @@ ctx.ui.addSettingsPanel({
 });
 ```
 
+## `ctx.ui.addStyles` (API 1.2)
+
+Inject a stylesheet after the app's own styles (plugin rules win ties). Removed automatically on unload. This is how custom CSS and theme plugins work.
+
+```ts
+ctx.ui.addStyles(".markdown-body { letter-spacing: 0.01em }");
+```
+
 ## `ctx.settings` (API 1.1)
 
 Per-plugin persisted key-value settings. Hydrated before `activate`, so `get` is synchronous; `set` persists in the background and survives restarts.
