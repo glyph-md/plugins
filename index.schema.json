@@ -64,6 +64,11 @@
             "type": "string"
           },
           "description": "Capabilities the plugin declares; shown to users in the install consent prompt."
+        },
+        "sha256": {
+          "type": "string",
+          "pattern": "^[A-Fa-f0-9]{64}$",
+          "description": "SHA-256 hex digest of the mainUrl file; Glyph verifies the download against it before installing."
         }
       }
     }
