@@ -146,7 +146,31 @@ ctx.registerTranslations("de", "myplugin", { greeting: "Hallo" });
 - Everything registered through `ctx` is removed automatically on unload.
 - `deactivate()` runs on unload too — use it only for teardown that doesn't go through a `ctx` disposer.
 
+## Sandboxed plugins (API 1.2)
+
+Declare `"sandbox": true` in `manifest.json` to run your plugin in an isolated worker instead of the app context:
+
+```json
+{
+  "id": "com.you.fetcher",
+  "name": "Fetcher",
+  "version": "1.0.0",
+  "apiVersion": "^1.2.0",
+  "sandbox": true,
+  "permissions": ["network:api.example.com"]
+}
+```
+
+Inside the sandbox:
+
+- There is no DOM and no Tauri access; the plugin talks to the host only through the plugin API.
+- `fetch` works only for hosts covered by your `network:<host>` permissions (the exact host or a subdomain of it). `XMLHttpRequest`, `WebSocket`, and `importScripts` are removed.
+- The available API subset is: `ctx.commands`, `ctx.ui.addStyles`, `ctx.exporters`, `ctx.workspace` (still requires `workspace:read`), `ctx.settings`, `ctx.notify`, and `ctx.registerTranslations`.
+- Not available: `ctx.markdown` and the DOM-mount APIs (`addStatusBarItem`, `addSidebarPanel`, `addSettingsPanel`), because they cannot cross the worker boundary.
+
+Prefer the sandbox when your plugin needs network access or doesn't touch the UI; users can trust it with less.
+
 ## Not available yet
 
-No direct network, shell, or `invoke` access; filesystem access only through the permission-gated `ctx.workspace`. Per-plugin network gating and a sandboxed plugin type are on the [roadmap](https://github.com/hamidfzm/glyph/issues/109).
+No shell or `invoke` access; filesystem access only through the permission-gated `ctx.workspace`. In the main (non-sandboxed) context there is no network gating, so network-using plugins should opt into the sandbox. More capabilities are tracked on the [roadmap](https://github.com/hamidfzm/glyph/issues/109).
  

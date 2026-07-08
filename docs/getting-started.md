@@ -69,3 +69,5 @@ Use **Manage Plugins…** to enable/disable or remove it. To ship it to other us
 | `apiVersion` | yes | Glyph plugin-API range, e.g. `^1.0.0` |
 | `description` | no | One-line summary |
 | `main` | no | Entry file name, defaults to `main.js` |
+| `permissions` | no | Capabilities you request (e.g. `workspace:read`, `network:api.example.com`); shown to users for consent |
+| `sandbox` | no | `true` runs the plugin in an isolated worker with network fenced to its `network:` permissions; see the [API reference](api-reference.md#sandboxed-plugins-api-12) |

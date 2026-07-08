@@ -69,6 +69,10 @@
           "type": "string",
           "pattern": "^[A-Fa-f0-9]{64}$",
           "description": "SHA-256 hex digest of the mainUrl file; Glyph verifies the download against it before installing."
+        },
+        "sandbox": {
+          "type": "boolean",
+          "description": "Run the plugin in an isolated worker (no DOM, network fenced to its network: permissions). Only the non-UI API subset is available; see the docs."
         }
       }
     }
