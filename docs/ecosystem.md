@@ -1,0 +1,46 @@
+# The Glyph Plugin Ecosystem
+
+Three repositories make up the plugin ecosystem. This page maps what lives where and how versions flow between them.
+
+## The repos
+
+| Repo | What it is | You go there to |
+|---|---|---|
+| [hamidfzm/glyph](https://github.com/hamidfzm/glyph) | The app and the plugin **host**: loader, registries, permission gating, sandbox, marketplace client | Change how plugins run, propose new API surface, report host bugs |
+| [glyph-md/plugins](https://github.com/glyph-md/plugins) (this repo) | The **marketplace index** (`index.json`), these docs, and the plugin catalog | Publish or update a plugin, read/write documentation |
+| [glyph-md/plugin-template](https://github.com/glyph-md/plugin-template) | The **scaffold**: build setup, `types/glyph.d.ts`, a working sample | Start a new plugin (click *Use this template*) |
+
+## How the pieces connect
+
+```
+plugin author                          user
+     │                                   │
+     │ scaffolds from                    │ installs via
+     ▼                                   ▼
+plugin-template ──types track──▶ glyph (host, PLUGIN_API_VERSION)
+     │                                   ▲
+     │ publishes entry to                │ fetches index.json + main.js,
+     ▼                                   │ verifies sha256, checks updates
+glyph-md/plugins (index.json) ───────────┘
+```
+
+- The app fetches `index.json` from this repo's `main` branch to list marketplace plugins, detect updates (version diff), and install (`mainUrl` download, verified against `sha256` when present).
+- Plugin code itself is **not** hosted here (except samples like Hello Status); each entry's `mainUrl` points at the plugin's own repo, pinned to a tag or commit.
+- The template ships type declarations that mirror the host's `ctx`, so plugin authors get autocomplete without a runtime dependency.
+
+## Version flow
+
+Three version numbers matter, and they are linked:
+
+1. **`PLUGIN_API_VERSION`** in the app (`src/lib/plugins/apiVersion.ts`, currently 1.2.0). Bumped when the `ctx` surface grows.
+2. **`apiVersion`** in each plugin's manifest: a semver range checked against the host's version at load time (e.g. `^1.0.0` keeps working on 1.2).
+3. **`version`** of each plugin: its own semver, used by the marketplace to offer updates.
+
+The maintenance convention: every app PR that changes the plugin API updates, in the same delivery,
+
+- `api-reference.md` here, with an "(API X.Y)" marker on the new section,
+- the template's `types/glyph.d.ts` (header comment states the version),
+- `index.schema.json` if the manifest grew a field,
+- [recipes.md](recipes.md) if a new contribution point landed.
+
+So the doc markers, the template types, and the host constant always describe the same API.

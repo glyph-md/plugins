@@ -36,3 +36,20 @@ jobs:
           }
           console.log(`index.json OK (${ids.length} plugin${ids.length === 1 ? "" : "s"})`);
           EOF
+
+      - name: Check every published plugin has a catalog entry
+        run: |
+          node - << 'EOF'
+          const { readFileSync } = require("fs");
+          const { plugins } = require("./index.json");
+          const catalog = readFileSync("docs/plugin-catalog.md", "utf8");
+          const missing = plugins.filter((p) => !catalog.includes("`" + p.id + "`"));
+          if (missing.length) {
+            console.error(
+              "docs/plugin-catalog.md is missing entries for:\n" +
+                missing.map((p) => `  ${p.id}`).join("\n"),
+            );
+            process.exit(1);
+          }
+          console.log("catalog OK");
+          EOF
