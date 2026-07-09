@@ -1,0 +1,8 @@
+{
+  "id": "com.glyph.spellcheck-fa",
+  "name": "Persian Spell Check",
+  "version": "1.0.0",
+  "apiVersion": "^1.3.0",
+  "description": "Persian (Farsi) spell-check dictionary: adds فارسی to Settings → Editor → Spell Check.",
+  "permissions": ["network:cdn.jsdelivr.net"]
+}

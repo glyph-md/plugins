@@ -100,6 +100,26 @@ ctx.exporters.register({
 });
 ```
 
+## `ctx.spellcheck` (API 1.3)
+
+Contribute a spell-check dictionary. The language appears (by `label`) in Settings → Editor → Spell Check → Language, and `load` runs only the first time the user selects it, so a fetched dictionary costs nothing until then. Registering a code Glyph already knows (including the built-in `en`) replaces it; unloading the plugin removes the language and drops any cached checker built from it.
+
+```ts
+ctx.spellcheck.registerDictionary({
+  language: "fa",
+  label: "فارسی (Persian)",
+  async load() {
+    // Return Hunspell sources as text, from wherever suits your plugin:
+    // inlined strings, or a fetch under a `network:` permission.
+    return { aff, dic };
+  },
+});
+```
+
+- `load` must resolve to `{ aff, dic }`: the two Hunspell files as UTF-8 text.
+- Main-context only; the sandbox does not expose `ctx.spellcheck` (the loader would have to cross the worker bridge).
+- A rejected `load` is not cached: the next time the user selects the language, Glyph calls it again.
+
 ## `ctx.markdown`
 
 Extend how documents render.
