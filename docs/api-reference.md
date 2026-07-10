@@ -1,4 +1,4 @@
-# API Reference (v1)
+# API Reference (0.16.0)
 
 A plugin default-exports `{ activate(ctx), deactivate? }`. `activate` receives the **plugin context** (`ctx`), the only door to the host. Every `register*` call returns a **disposer** and is also auto-removed on unload, so you rarely call disposers yourself.
 
@@ -11,7 +11,7 @@ export interface PluginModule {
 
 ## `ctx.apiVersion`
 
-The host's plugin-API version (string). Your manifest's `apiVersion` range is checked against it before the plugin loads.
+The host's plugin-API version (string), currently `0.16.0`. The API is unstable until 1.0: your manifest's `apiVersion` must equal the host version exactly (a caret grants nothing below 1.0), and any bump may break plugins. Normal caret ranges start at 1.0.0.
 
 ## `ctx.commands`
 
@@ -40,7 +40,7 @@ ctx.ui.addStatusBarItem({
 
 `mount(el, registerCleanup)` is **framework-agnostic**: write into `el` with vanilla DOM, or mount React/Svelte/Vue into it. Register any teardown (timers, listeners, framework unmount) via `registerCleanup`.
 
-## `ctx.ui.addSidebarPanel` (API 1.1)
+## `ctx.ui.addSidebarPanel`
 
 A titled section rendered in the sidebar below the built-in Outline. Same `mount` contract as status bar items.
 
@@ -52,7 +52,7 @@ ctx.ui.addSidebarPanel({
 });
 ```
 
-## `ctx.ui.addSettingsPanel` (API 1.1)
+## `ctx.ui.addSettingsPanel`
 
 One settings UI per plugin, shown under your plugin's row in Manage Plugins while it is enabled. Pair it with `ctx.settings` to persist what the user picks.
 
@@ -68,7 +68,7 @@ ctx.ui.addSettingsPanel({
 });
 ```
 
-## `ctx.ui.addStyles` (API 1.2)
+## `ctx.ui.addStyles`
 
 Inject a stylesheet after the app's own styles (plugin rules win ties). Removed automatically on unload. This is how custom CSS and theme plugins work.
 
@@ -76,7 +76,7 @@ Inject a stylesheet after the app's own styles (plugin rules win ties). Removed 
 ctx.ui.addStyles(".markdown-body { letter-spacing: 0.01em }");
 ```
 
-## `ctx.settings` (API 1.1)
+## `ctx.settings`
 
 Per-plugin persisted key-value settings. Hydrated before `activate`, so `get` is synchronous; `set` persists in the background and survives restarts.
 
@@ -85,7 +85,7 @@ const size = ctx.settings.get<number>("size") ?? 12;
 ctx.settings.set("size", size + 1);
 ```
 
-## `ctx.exporters` (API 1.1)
+## `ctx.exporters`
 
 Contribute an export format. The host runs the shared pipeline (prepares the rendered document, asks for a save location with a derived filename, writes the file); your plugin only turns HTML into file contents (string or `Uint8Array`). It appears in the command palette as "Export: <label>…".
 
@@ -125,6 +125,20 @@ const files = await ctx.workspace.listFiles();      // absolute paths of workspa
 const text  = await ctx.workspace.readFile("sub/notes.md");
 ```
 
+## `ctx.spellcheck`
+
+Contribute a spell-check dictionary; it appears in Settings → Editor's language picker, and `load` runs only when the user first selects the language. Registering an existing code (including the built-in `en`) replaces it; unloading the plugin removes it.
+
+```ts
+ctx.spellcheck.registerDictionary({
+  language: "fa",
+  label: "فارسی (Persian)",
+  load: async () => ({ aff: AFF_TEXT, dic: DIC_TEXT }),
+});
+```
+
+Real dictionaries are megabytes of Hunspell text; ship them as packaged assets once plugin packages land (hamidfzm/glyph#407) rather than embedding them in `main.js`.
+
 ## `ctx.notify`
 
 ```ts
@@ -146,7 +160,7 @@ ctx.registerTranslations("de", "myplugin", { greeting: "Hallo" });
 - Everything registered through `ctx` is removed automatically on unload.
 - `deactivate()` runs on unload too — use it only for teardown that doesn't go through a `ctx` disposer.
 
-## Sandboxed plugins (API 1.2)
+## Sandboxed plugins
 
 Declare `"sandbox": true` in `manifest.json` to run your plugin in an isolated worker instead of the app context:
 
@@ -155,7 +169,7 @@ Declare `"sandbox": true` in `manifest.json` to run your plugin in an isolated w
   "id": "com.you.fetcher",
   "name": "Fetcher",
   "version": "1.0.0",
-  "apiVersion": "^1.2.0",
+  "apiVersion": "0.16.0",
   "sandbox": true,
   "permissions": ["network:api.example.com"]
 }

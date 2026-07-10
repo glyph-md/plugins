@@ -36,7 +36,7 @@ export default {
 };
 ```
 
-## Sidebar panel (API 1.1)
+## Sidebar panel
 
 ```js
 export default {
@@ -52,7 +52,7 @@ export default {
 };
 ```
 
-## Settings panel (API 1.1) with persisted settings
+## Settings panel with persisted settings
 
 `ctx.settings` is hydrated before `activate`, so `get` is synchronous.
 
@@ -72,7 +72,7 @@ export default {
 };
 ```
 
-## Injected styles (API 1.2)
+## Injected styles
 
 Theme tweaks and custom CSS ship as plugins; styles are removed on unload.
 
@@ -127,7 +127,7 @@ export default {
 };
 ```
 
-## Exporter (API 1.1)
+## Exporter
 
 The host prepares the rendered HTML, asks for a save location, and writes the file; you only turn HTML into contents. Appears in the palette as "Export: Plain HTML…".
 
@@ -177,16 +177,32 @@ export default {
 };
 ```
 
-## Sandboxed network plugin (API 1.2)
+## Spell-check dictionary
 
-Set `"sandbox": true` and declare the hosts you call; `fetch` is fenced to them and the plugin runs in a worker with no DOM. See [the API reference](api-reference.md#sandboxed-plugins-api-12) for the available ctx subset.
+Add a language to Settings → Editor → Spell Check. `load` is lazy: it runs only when the user picks the language. (Real Hunspell dictionaries are large; ship them as packaged assets once hamidfzm/glyph#407 lands.)
+
+```js
+export default {
+  activate(ctx) {
+    ctx.spellcheck.registerDictionary({
+      language: "xx",
+      label: "Demo language",
+      load: async () => ({ aff: "SET UTF-8\n", dic: "2\nhello\nworld\n" }),
+    });
+  },
+};
+```
+
+## Sandboxed network plugin
+
+Set `"sandbox": true` and declare the hosts you call; `fetch` is fenced to them and the plugin runs in a worker with no DOM. See [the API reference](api-reference.md#sandboxed-plugins) for the available ctx subset.
 
 ```json
 {
   "id": "demo.quote",
   "name": "Quote of the Day",
   "version": "1.0.0",
-  "apiVersion": "^1.2.0",
+  "apiVersion": "0.16.0",
   "sandbox": true,
   "permissions": ["network:zenquotes.io"]
 }

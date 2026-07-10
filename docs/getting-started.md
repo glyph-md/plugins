@@ -66,8 +66,8 @@ Use **Manage Plugins…** to enable/disable or remove it. To ship it to other us
 | `id` | yes | Reverse-DNS id; also the install folder name (letters, digits, `.`, `_`, `-`) |
 | `name` | yes | Display name |
 | `version` | yes | The plugin's semver |
-| `apiVersion` | yes | Glyph plugin-API range, e.g. `^1.0.0` |
+| `apiVersion` | yes | Glyph plugin-API version; exact match required until 1.0 (currently `0.16.0`) |
 | `description` | no | One-line summary |
 | `main` | no | Entry file name, defaults to `main.js` |
 | `permissions` | no | Capabilities you request (e.g. `workspace:read`, `network:api.example.com`); shown to users for consent |
-| `sandbox` | no | `true` runs the plugin in an isolated worker with network fenced to its `network:` permissions; see the [API reference](api-reference.md#sandboxed-plugins-api-12) |
+| `sandbox` | no | `true` runs the plugin in an isolated worker with network fenced to its `network:` permissions; see the [API reference](api-reference.md#sandboxed-plugins) |

@@ -24,7 +24,7 @@ The delivery plan lived in [hamidfzm/glyph#109](https://github.com/hamidfzm/glyp
 - **Foundation**: loader (data-URL ESM import), host with per-plugin disposer bags, Rust install/list/uninstall, Manage Plugins modal
 - **A: Markdown pipeline**: remark/rehype plugins, fenced code-block renderers
 - **B: Trust**: declared permissions, install consent, permission-gated workspace API
-- **C/D: Surface growth (API 1.1/1.2)**: sidebar panels, settings panels, exporters, per-plugin settings, translations, `addStyles`
+- **C/D: Surface growth**: sidebar panels, settings panels, exporters, per-plugin settings, translations, `addStyles`, spell-check dictionaries
 - **E: Distribution hardening**: index CI validation, sha256 download verification, and the opt-in worker sandbox
 
 All phases are complete; new work is incremental API/proposal-driven.
@@ -34,7 +34,7 @@ All phases are complete; new work is incremental API/proposal-driven.
 1. Open a feature issue on hamidfzm/glyph describing the contribution point (what a plugin registers, what the host renders/runs, what can go wrong on unload).
 2. Every registration must return a disposer and route through the plugin's `DisposerBag`, so unload removes exactly that plugin's contributions.
 3. Decide the sandbox story up front: can the API cross a `postMessage` boundary? If not (DOM mounts, React components), it stays main-context only and the docs must say so.
-4. Bump `PLUGIN_API_VERSION` (minor for additions) and ship, in the same PR series: host code + tests, `api-reference.md` marker, template `types/glyph.d.ts`, a [recipe](recipes.md), and `index.schema.json` if the manifest changed.
+4. Bump the pinned `PLUGIN_API_VERSION` (exact-match until 1.0, see hamidfzm/glyph#415) and ship, in the same PR series: host code + tests, `api-reference.md` marker, template `types/glyph.d.ts`, a [recipe](recipes.md), and `index.schema.json` if the manifest changed.
 
 ## Gates
 

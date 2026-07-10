@@ -6,7 +6,7 @@
       "name": "Hello Status",
       "description": "Sample plugin: a status bar greeting and a command palette entry.",
       "version": "1.0.0",
-      "apiVersion": "^1.0.0",
+      "apiVersion": "0.16.0",
       "mainUrl": "https://raw.githubusercontent.com/glyph-md/plugins/main/com.glyph.hello-status/main.js"
     }
   ]

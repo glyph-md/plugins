@@ -13,7 +13,7 @@ Glyph reads a marketplace index (`index.json`) maintained in [glyph-md/plugins](
      "name": "Example",
      "description": "What it does, in one line.",
      "version": "1.0.0",
-     "apiVersion": "^1.0.0",
+     "apiVersion": "0.16.0",
      "mainUrl": "https://raw.githubusercontent.com/yourname/glyph-example/v1.0.0/main.js"
    }
    ```
@@ -29,4 +29,4 @@ Cut a new release, then open a PR that bumps **both** `version` and `mainUrl` (t
 ## Versioning
 
 - `version` — your plugin's semver; must increase when `mainUrl` changes.
-- `apiVersion` — the Glyph plugin-API range you target (`^1.0.0`). Glyph refuses to load a plugin whose range it doesn't satisfy, so test against the API version you declare.
+- `apiVersion`: the Glyph plugin-API version you built against (currently `0.16.0`). Until the API reaches 1.0 it must match the host exactly; Glyph refuses to load anything else, so retest and republish when the API version bumps.

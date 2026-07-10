@@ -50,7 +50,7 @@
         "apiVersion": {
           "type": "string",
           "pattern": "^\\^?\\d+\\.\\d+\\.\\d+$",
-          "description": "Glyph plugin-API range, exact or caret, e.g. ^1.0.0."
+          "description": "Glyph plugin-API version. Unstable until 1.0: while the API major is 0, plugins must state the exact host version (currently 0.16.0) and a caret grants nothing; caret ranges apply from 1.0.0."
         },
         "mainUrl": {
           "type": "string",
