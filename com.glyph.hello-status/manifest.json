@@ -3,5 +3,6 @@
   "name": "Hello Status",
   "version": "1.0.0",
   "apiVersion": "0.16.0",
+  "files": ["main.js"],
   "description": "Sample plugin: a status bar greeting and a command palette entry."
 }

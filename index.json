@@ -2,12 +2,22 @@
   "$schema": "https://raw.githubusercontent.com/glyph-md/plugins/main/index.schema.json",
   "plugins": [
     {
+      "id": "com.glyph.dictionary-fa",
+      "name": "Persian Dictionary",
+      "description": "Persian (Farsi) spell-check dictionary, based on the Lilak project.",
+      "version": "1.0.0",
+      "apiVersion": "0.16.0",
+      "packageUrl": "https://github.com/glyph-md/plugins/releases/download/com.glyph.dictionary-fa-v1.0.0/com.glyph.dictionary-fa.zip",
+      "sha256": "1dd766472ed6a253cc1c1937f8d4fa325558f4d4beb6c807d2f45ca0d3b26658"
+    },
+    {
       "id": "com.glyph.hello-status",
       "name": "Hello Status",
       "description": "Sample plugin: a status bar greeting and a command palette entry.",
       "version": "1.0.0",
       "apiVersion": "0.16.0",
-      "mainUrl": "https://raw.githubusercontent.com/glyph-md/plugins/main/com.glyph.hello-status/main.js"
+      "packageUrl": "https://github.com/glyph-md/plugins/releases/download/com.glyph.hello-status-v1.0.0/com.glyph.hello-status.zip",
+      "sha256": "3ba78f030013fc1d15836df6b1867ec96f13be2ecc07ebc92865fbcfd9875ff6"
     }
   ]
 }

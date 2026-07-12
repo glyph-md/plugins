@@ -26,7 +26,8 @@
         "name",
         "version",
         "apiVersion",
-        "mainUrl"
+        "packageUrl",
+        "sha256"
       ],
       "additionalProperties": false,
       "properties": {
@@ -45,18 +46,12 @@
         "version": {
           "type": "string",
           "pattern": "^\\d+\\.\\d+\\.\\d+$",
-          "description": "Plugin semver; must increase when mainUrl changes."
+          "description": "Plugin semver; must increase when packageUrl changes."
         },
         "apiVersion": {
           "type": "string",
           "pattern": "^\\^?\\d+\\.\\d+\\.\\d+$",
           "description": "Glyph plugin-API version. Unstable until 1.0: while the API major is 0, plugins must state the exact host version (currently 0.16.0) and a caret grants nothing; caret ranges apply from 1.0.0."
-        },
-        "mainUrl": {
-          "type": "string",
-          "format": "uri",
-          "pattern": "^https://",
-          "description": "HTTPS URL to the built single-file ES module, pinned to a tag or commit."
         },
         "permissions": {
           "type": "array",
@@ -68,11 +63,17 @@
         "sha256": {
           "type": "string",
           "pattern": "^[A-Fa-f0-9]{64}$",
-          "description": "SHA-256 hex digest of the mainUrl file; Glyph verifies the download against it before installing."
+          "description": "SHA-256 hex digest of the packageUrl zip; Glyph verifies the download against it before installing, and only the manifest-declared files are extracted."
         },
         "sandbox": {
           "type": "boolean",
           "description": "Run the plugin in an isolated worker (no DOM, network fenced to its network: permissions). Only the non-UI API subset is available; see the docs."
+        },
+        "packageUrl": {
+          "type": "string",
+          "format": "uri",
+          "pattern": "^https://",
+          "description": "HTTPS URL of the plugin's release zip (manifest.json plus the manifest-declared files), pinned to a tag."
         }
       }
     }

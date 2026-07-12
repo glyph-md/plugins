@@ -29,8 +29,8 @@ jobs:
             process.exit(1);
           }
           for (const p of plugins) {
-            if (!p.mainUrl.startsWith("https://")) {
-              console.error(`${p.id}: mainUrl must be https`);
+            if (!p.packageUrl.startsWith("https://")) {
+              console.error(`${p.id}: packageUrl must be https`);
               process.exit(1);
             }
           }
