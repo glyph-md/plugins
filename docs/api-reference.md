@@ -125,6 +125,15 @@ const files = await ctx.workspace.listFiles();      // absolute paths of workspa
 const text  = await ctx.workspace.readFile("sub/notes.md");
 ```
 
+## `ctx.assets`
+
+Read your plugin's own bundled files: exactly the ones declared in the manifest's `files` list. No permission needed, it is your own reviewed content, and the host re-validates every path.
+
+```ts
+const dic = await ctx.assets.readText("assets/fa.dic");
+const font = await ctx.assets.readBinary("assets/font.woff2");
+```
+
 ## `ctx.spellcheck`
 
 Contribute a spell-check dictionary; it appears in Settings → Editor's language picker, and `load` runs only when the user first selects the language. Registering an existing code (including the built-in `en`) replaces it; unloading the plugin removes it.
@@ -137,7 +146,7 @@ ctx.spellcheck.registerDictionary({
 });
 ```
 
-Real dictionaries are megabytes of Hunspell text; ship them as packaged assets once plugin packages land (hamidfzm/glyph#407) rather than embedding them in `main.js`.
+Real dictionaries are megabytes of Hunspell text; ship them as package assets and read them with `ctx.assets` (see the [recipe](recipes.md#spell-check-dictionary)) rather than embedding them in `main.js`.
 
 ## `ctx.notify`
 
@@ -179,7 +188,7 @@ Inside the sandbox:
 
 - There is no DOM and no Tauri access; the plugin talks to the host only through the plugin API.
 - `fetch` works only for hosts covered by your `network:<host>` permissions (the exact host or a subdomain of it). `XMLHttpRequest`, `WebSocket`, and `importScripts` are removed.
-- The available API subset is: `ctx.commands`, `ctx.ui.addStyles`, `ctx.exporters`, `ctx.workspace` (still requires `workspace:read`), `ctx.settings`, `ctx.notify`, and `ctx.registerTranslations`.
+- The available API subset is: `ctx.commands`, `ctx.ui.addStyles`, `ctx.exporters`, `ctx.workspace` (still requires `workspace:read`), `ctx.assets`, `ctx.settings`, `ctx.notify`, and `ctx.registerTranslations`.
 - Not available: `ctx.markdown` and the DOM-mount APIs (`addStatusBarItem`, `addSidebarPanel`, `addSettingsPanel`), because they cannot cross the worker boundary.
 
 Prefer the sandbox when your plugin needs network access or doesn't touch the UI; users can trust it with less.

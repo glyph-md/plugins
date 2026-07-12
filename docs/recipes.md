@@ -179,15 +179,30 @@ export default {
 
 ## Spell-check dictionary
 
-Add a language to Settings → Editor → Spell Check. `load` is lazy: it runs only when the user picks the language. (Real Hunspell dictionaries are large; ship them as packaged assets once hamidfzm/glyph#407 lands.)
+Add a language to Settings → Editor → Spell Check. Ship the Hunspell files as package assets and read them through `ctx.assets`; `load` is lazy, so nothing is read until the user picks the language. No permissions needed: bundled assets are the plugin's own content.
+
+```json
+{
+  "id": "com.you.dictionary-fa",
+  "name": "Persian Dictionary",
+  "version": "1.0.0",
+  "apiVersion": "0.16.0",
+  "main": "main.js",
+  "files": ["main.js", "assets/fa.aff", "assets/fa.dic"],
+  "permissions": []
+}
+```
 
 ```js
 export default {
   activate(ctx) {
     ctx.spellcheck.registerDictionary({
-      language: "xx",
-      label: "Demo language",
-      load: async () => ({ aff: "SET UTF-8\n", dic: "2\nhello\nworld\n" }),
+      language: "fa",
+      label: "فارسی (Persian)",
+      load: async () => ({
+        aff: await ctx.assets.readText("assets/fa.aff"),
+        dic: await ctx.assets.readText("assets/fa.dic"),
+      }),
     });
   },
 };

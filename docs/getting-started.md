@@ -69,5 +69,6 @@ Use **Manage Plugins…** to enable/disable or remove it. To ship it to other us
 | `apiVersion` | yes | Glyph plugin-API version; exact match required until 1.0 (currently `0.16.0`) |
 | `description` | no | One-line summary |
 | `main` | no | Entry file name, defaults to `main.js` |
+| `files` | no | Every file the plugin consists of (must include `main`), e.g. `["main.js", "assets/fa.dic"]`. Required to ship assets: installs copy exactly this list and `ctx.assets` reads are limited to it |
 | `permissions` | no | Capabilities you request (e.g. `workspace:read`, `network:api.example.com`); shown to users for consent |
 | `sandbox` | no | `true` runs the plugin in an isolated worker with network fenced to its `network:` permissions; see the [API reference](api-reference.md#sandboxed-plugins) |

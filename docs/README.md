@@ -24,7 +24,7 @@ A plugin is a folder with two files:
 
 ```
 my-plugin/
-├── manifest.json   # id, name, version, apiVersion (+ permissions, sandbox)
+├── manifest.json   # id, name, version, apiVersion (+ files, permissions, sandbox)
 └── main.js         # pre-built ES module, default-exports { activate }
 ```
 

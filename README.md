@@ -33,7 +33,8 @@ On launch Glyph fetches `index.json` from this repo's `main` branch over HTTPS (
   "description": "What it does, in one line.",
   "version": "1.0.0",
   "apiVersion": "^1.0.0",
-  "mainUrl": "https://raw.githubusercontent.com/author/glyph-example/v1.0.0/main.js"
+  "packageUrl": "https://github.com/author/glyph-example/releases/download/v1.0.0/plugin.zip",
+  "sha256": "<hex digest of plugin.zip>"
 }
 ```
 
@@ -44,7 +45,7 @@ On launch Glyph fetches `index.json` from this repo's `main` branch over HTTPS (
 | `description` | no | One-line summary |
 | `version` | yes | The plugin's current semver; bumping it triggers the in-app update prompt |
 | `apiVersion` | yes | Glyph plugin-API range the plugin targets, e.g. `^1.0.0` |
-| `mainUrl` | yes | Direct URL to the plugin's built single-file ES module |
+| `packageUrl` | yes | URL of the release zip: `manifest.json` plus the manifest-declared files |
 
 Entries are validated against [`index.schema.json`](index.schema.json).
 

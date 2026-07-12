@@ -14,7 +14,8 @@ The marketplace is just [`index.json`](index.json). To list or update a plugin y
      "description": "What it does, in one line.",
      "version": "1.0.0",
      "apiVersion": "^1.0.0",
-     "mainUrl": "https://raw.githubusercontent.com/yourname/glyph-example/v1.0.0/main.js"
+     "packageUrl": "https://github.com/yourname/glyph-example/releases/download/v1.0.0/plugin.zip",
+     "sha256": "<hex digest of plugin.zip>"
    }
    ```
 
@@ -43,11 +44,11 @@ Notes:
 
 - **Don't bundle React or the markdown pipeline.** Glyph provides those; when the API hands them to you, mark them `--external:react` (etc.) so there's one copy at runtime. The current API surface is DOM-based and needs no such externals.
 - Keep the output readable enough to review, `--minify` is fine, obfuscation is not (see review criteria).
-- Commit `main.js` to your release (or attach it as a release asset) and point `mainUrl` at that tagged path.
+- Zip `manifest.json` plus the manifest-declared `files` (entry + assets), attach it to a tagged release, and point `packageUrl` at that asset with its `sha256` digest.
 
 ## Update a plugin
 
-Cut a new release in your repo, then open a PR that bumps **both** `version` and `mainUrl` (to the new tag). Glyph compares the index `version` against what each user has installed and offers an in-app update when they differ.
+Cut a new release in your repo, then open a PR that bumps `version`, `packageUrl` (to the new tag), and `sha256`. Glyph compares the index `version` against what each user has installed and offers an in-app update when they differ.
 
 ## Entry rules
 
@@ -56,16 +57,16 @@ Cut a new release in your repo, then open a PR that bumps **both** `version` and
 | `id` | Reverse-DNS, unique across the index. Only letters, digits, `.`, `_`, `-`. It becomes a folder name, so no slashes or spaces. |
 | `name` | Short, human-readable. |
 | `description` | One line, no trailing period needed. Optional but recommended. |
-| `version` | Valid semver (`MAJOR.MINOR.PATCH`). Must increase when `mainUrl` changes. |
+| `version` | Valid semver (`MAJOR.MINOR.PATCH`). Must increase when `packageUrl` changes. |
 | `apiVersion` | A caret or exact range against the Glyph plugin API, e.g. `^1.0.0`. Glyph refuses to load a plugin whose range it doesn't satisfy. |
-| `mainUrl` | HTTPS URL to the built single-file ESM. **Pin it to a tag or commit**, not a moving branch, so an install is reproducible and an update is an explicit version bump. |
+| `packageUrl` | HTTPS URL to the release zip (manifest + declared files). **Pin it to a tag**, not a moving branch: the `sha256` digest is verified before install, and only the manifest-declared files are extracted. |
 
 ## Review criteria
 
 A maintainer will check that:
 
 - The entry validates against the schema and the array stays sorted by `id`.
-- `mainUrl` resolves and serves a single ES module that default-exports `{ activate }`.
+- `packageUrl` resolves to a zip whose root `manifest.json` declares `files`, and whose entry default-exports `{ activate }`.
 - The code is readable (not obfuscated) so it can be reviewed.
 - It doesn't bundle its own copy of React or the markdown pipeline (Glyph provides those).
 - The plugin does what its `description` says and nothing surprising.
