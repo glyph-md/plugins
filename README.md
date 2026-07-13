@@ -2,7 +2,7 @@
 
 The official plugin marketplace for [Glyph](https://github.com/hamidfzm/glyph), a cross-platform markdown viewer.
 
-This repository is a single index, [`index.json`](index.json), that lists community plugins. Glyph reads it to discover plugins, install them, and detect new versions. **Plugin code lives in each plugin's own repository**, not here; the index only points at it.
+This repository registers plugins: one folder each under [`plugins/`](plugins) holding a `plugin.json` (id, category, packageUrl, sha256, …) and a `README.md` catalog page. [`index.json`](index.json) is **generated** from those registrations, and Glyph reads it to discover, install, and update plugins. **Community plugin code lives in each plugin's own repository**; official plugins keep their source next to their registration here.
 
 ## For users
 

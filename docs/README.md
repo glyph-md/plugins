@@ -12,7 +12,7 @@ Glyph plugins are small JavaScript modules that extend the app: command-palette 
 
 **I want to publish or install plugins**
 - [Publishing](publishing.md): manifest, releases, sha256, the marketplace index
-- [Plugin Catalog](plugin-catalog.md): what's published and what each plugin asks for
+- [Plugin Catalog](plugin-catalog.md): what's published and what each plugin asks for (generated; each plugin's own README is its page)
 
 **I want to improve the plugin system itself**
 - [Contributing](contributing.md): host code map, how to propose API surface, gates

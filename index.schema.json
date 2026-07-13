@@ -27,7 +27,8 @@
         "version",
         "apiVersion",
         "packageUrl",
-        "sha256"
+        "sha256",
+        "category"
       ],
       "additionalProperties": false,
       "properties": {
@@ -74,8 +75,33 @@
           "format": "uri",
           "pattern": "^https://",
           "description": "HTTPS URL of the plugin's release zip (manifest.json plus the manifest-declared files), pinned to a tag."
+        },
+        "category": {
+          "type": "string",
+          "enum": [
+            "themes",
+            "markdown",
+            "exporters",
+            "tools",
+            "integrations",
+            "language",
+            "ai"
+          ],
+          "description": "Marketplace section."
+        },
+        "keywords": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          },
+          "description": "Extra search terms for the marketplace search."
+        },
+        "official": {
+          "type": "boolean",
+          "description": "Maintained in this repo; packages are released from here."
         }
       }
     }
-  }
+  },
+  "description": "Generated aggregate of plugins/*/plugin.json; do not hand-edit. Run node scripts/build-index.mjs."
 }

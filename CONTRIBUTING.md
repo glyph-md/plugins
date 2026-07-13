@@ -1,26 +1,29 @@
 # Contributing a plugin
 
-The marketplace is just [`index.json`](index.json). To list or update a plugin you open a pull request that edits that one file. Your plugin's code stays in your own repository.
+The marketplace registers each plugin as one folder: `plugins/<id>/` holding a `plugin.json` (the registration) and a `README.md` (the catalog page shown to users). To list or update a plugin you open a pull request that touches only your folder, so submissions never conflict. Your plugin's code stays in your own repository; [`index.json`](index.json) and the catalog are generated from the registrations on merge.
 
 ## Add a plugin
 
 1. Build and publish your plugin in **your own repo** (start from the [plugin template](https://github.com/glyph-md/plugin-template) — click "Use this template"): a single ES module (`main.js`) that default-exports `{ activate(ctx) }`. Tag a release so the file has a stable, immutable URL.
-2. Fork this repo and add an entry to the `plugins` array in `index.json`:
+2. Fork this repo and add `plugins/<your-id>/plugin.json`:
 
    ```json
    {
+     "$schema": "../../plugin.schema.json",
      "id": "com.yourname.example",
      "name": "Example",
      "description": "What it does, in one line.",
      "version": "1.0.0",
-     "apiVersion": "^1.0.0",
+     "apiVersion": "0.16.0",
+     "category": "tools",
+     "keywords": ["example"],
      "packageUrl": "https://github.com/yourname/glyph-example/releases/download/v1.0.0/plugin.zip",
      "sha256": "<hex digest of plugin.zip>"
    }
    ```
 
-3. Validate it against [`index.schema.json`](index.schema.json) (most editors do this automatically via the `$schema` key). Keep the array sorted by `id`.
-4. Open a pull request.
+3. Add `plugins/<your-id>/README.md`: what the plugin does, its permissions, and any setup. This is the page users see in the marketplace details view.
+4. Open a pull request. CI validates the registration against [`plugin.schema.json`](plugin.schema.json) (the folder name must equal the `id`) and rejects direct edits to the generated `index.json`/catalog.
 
 ## Multiple files and bundling
 
@@ -48,24 +51,25 @@ Notes:
 
 ## Update a plugin
 
-Cut a new release in your repo, then open a PR that bumps `version`, `packageUrl` (to the new tag), and `sha256`. Glyph compares the index `version` against what each user has installed and offers an in-app update when they differ.
+Cut a new release in your repo, then open a PR that bumps `version`, `packageUrl` (to the new tag), and `sha256` in your `plugins/<id>/plugin.json`. Glyph compares the index `version` against what each user has installed and offers an in-app update when they differ.
 
 ## Entry rules
 
 | Field | Rule |
 |---|---|
-| `id` | Reverse-DNS, unique across the index. Only letters, digits, `.`, `_`, `-`. It becomes a folder name, so no slashes or spaces. |
+| `id` | Reverse-DNS, unique. Only letters, digits, `.`, `_`, `-`. It is the folder name here and the install folder name. |
 | `name` | Short, human-readable. |
 | `description` | One line, no trailing period needed. Optional but recommended. |
 | `version` | Valid semver (`MAJOR.MINOR.PATCH`). Must increase when `packageUrl` changes. |
-| `apiVersion` | A caret or exact range against the Glyph plugin API, e.g. `^1.0.0`. Glyph refuses to load a plugin whose range it doesn't satisfy. |
+| `apiVersion` | The Glyph plugin-API version you built against (currently `0.16.0`); exact match required until 1.0. |
+| `category` | One of `themes`, `markdown`, `exporters`, `tools`, `integrations`, `language`, `ai`. Drives the marketplace filter and the catalog grouping. |
 | `packageUrl` | HTTPS URL to the release zip (manifest + declared files). **Pin it to a tag**, not a moving branch: the `sha256` digest is verified before install, and only the manifest-declared files are extracted. |
 
 ## Review criteria
 
 A maintainer will check that:
 
-- The entry validates against the schema and the array stays sorted by `id`.
+- The registration validates against the schema, the folder name equals the `id`, and the README describes what users are trusting.
 - `packageUrl` resolves to a zip whose root `manifest.json` declares `files`, and whose entry default-exports `{ activate }`.
 - The code is readable (not obfuscated) so it can be reviewed.
 - It doesn't bundle its own copy of React or the markdown pipeline (Glyph provides those).

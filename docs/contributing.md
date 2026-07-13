@@ -15,7 +15,7 @@ All host code is in [hamidfzm/glyph](https://github.com/hamidfzm/glyph):
 | Manage Plugins UI | `src/components/plugins/PluginsModal.tsx` |
 | Rust commands (scan, install, uninstall) | `src-tauri/src/commands/plugins.rs` |
 
-This repo holds `index.json`, `index.schema.json`, the docs, and the sample plugin. The [template](https://github.com/glyph-md/plugin-template) holds the scaffold and types.
+This repo holds the per-plugin registrations under `plugins/<id>/` (plus the official plugins' source), the schemas, the generated `index.json` and catalog, and the docs. The [template](https://github.com/glyph-md/plugin-template) holds the scaffold and types.
 
 ## How the system was built
 

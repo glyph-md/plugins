@@ -1,0 +1,13 @@
+{
+  "$schema": "../../plugin.schema.json",
+  "id": "com.glyph.hello-status",
+  "name": "Hello Status",
+  "description": "Sample plugin: a status bar greeting and a command palette entry.",
+  "version": "1.0.0",
+  "apiVersion": "0.16.0",
+  "category": "tools",
+  "keywords": ["sample", "demo", "status-bar"],
+  "official": true,
+  "packageUrl": "https://github.com/glyph-md/plugins/releases/download/com.glyph.hello-status-v1.0.0/com.glyph.hello-status.zip",
+  "sha256": "3ba78f030013fc1d15836df6b1867ec96f13be2ecc07ebc92865fbcfd9875ff6"
+}

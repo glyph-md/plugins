@@ -21,10 +21,10 @@ plugin-template ──types track──▶ glyph (host, PLUGIN_API_VERSION)
      │                                   ▲
      │ publishes entry to                │ fetches index.json + main.js,
      ▼                                   │ verifies sha256, checks updates
-glyph-md/plugins (index.json) ───────────┘
+glyph-md/plugins (plugins/<id>/) ────────┘
 ```
 
-- The app fetches `index.json` from this repo's `main` branch to list marketplace plugins, detect updates (version diff), and install: the `packageUrl` zip is downloaded, verified against `sha256`, and only its manifest-declared files are copied out.
+- Registrations live one-per-folder under `plugins/<id>/`; CI generates `index.json` from them on merge. The app fetches that `index.json` from this repo's `main` branch to list marketplace plugins, detect updates (version diff), and install: the `packageUrl` zip is downloaded, verified against `sha256`, and only its manifest-declared files are copied out.
 - Plugin code itself is **not** hosted here (except official plugins like Hello Status); each entry's `packageUrl` points at a release asset in the plugin's own repo, pinned to a tag.
 - The template ships type declarations that mirror the host's `ctx`, so plugin authors get autocomplete without a runtime dependency.
 

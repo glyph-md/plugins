@@ -1,9 +1,12 @@
-name: Validate index
+name: Validate registry
 
 on:
   push:
     branches: [main]
   pull_request:
+
+permissions:
+  contents: write
 
 jobs:
   validate:
@@ -11,45 +14,44 @@ jobs:
     steps:
       - uses: actions/checkout@v5
 
-      - name: Validate index.json against the schema
+      - name: Validate every plugin registration
+        run: |
+          set -e
+          for dir in plugins/*/; do
+            id=$(basename "$dir")
+            test -f "$dir/plugin.json" || { echo "$id: missing plugin.json"; exit 1; }
+            test -f "$dir/README.md" || { echo "$id: missing README.md (the catalog page)"; exit 1; }
+            npx --yes ajv-cli@5 validate -s plugin.schema.json -d "$dir/plugin.json" --strict=false
+            declared=$(node -p "require('./$dir/plugin.json').id")
+            [ "$declared" = "$id" ] || { echo "$id: plugin.json declares id \"$declared\"; the folder name must equal the id"; exit 1; }
+          done
+
+      - name: Reject hand edits to generated files in PRs
+        if: github.event_name == 'pull_request'
+        run: |
+          git fetch --depth=1 origin "${{ github.base_ref }}"
+          if ! git diff --quiet "origin/${{ github.base_ref }}" HEAD -- index.json docs/plugin-catalog.md; then
+            echo "index.json and docs/plugin-catalog.md are generated from plugins/*/plugin.json."
+            echo "Do not edit them in a PR; they are regenerated automatically on merge to main."
+            git diff --stat "origin/${{ github.base_ref }}" HEAD -- index.json docs/plugin-catalog.md
+            exit 1
+          fi
+
+      - name: Generate index.json and the catalog
+        run: node scripts/build-index.mjs
+
+      - name: Validate the generated index against its schema
         run: npx --yes ajv-cli@5 validate -s index.schema.json -d index.json --strict=false
 
-      - name: Check entry ordering and URL hygiene
+      - name: Commit regenerated files on main
+        if: github.event_name == 'push' && github.ref == 'refs/heads/main'
         run: |
-          node - << 'EOF'
-          const { plugins } = require("./index.json");
-          const ids = plugins.map((p) => p.id);
-          const sorted = [...ids].sort();
-          if (JSON.stringify(ids) !== JSON.stringify(sorted)) {
-            console.error("plugins[] must be sorted by id. Expected order:\n" + sorted.join("\n"));
-            process.exit(1);
-          }
-          if (new Set(ids).size !== ids.length) {
-            console.error("duplicate plugin ids in index.json");
-            process.exit(1);
-          }
-          for (const p of plugins) {
-            if (!p.packageUrl.startsWith("https://")) {
-              console.error(`${p.id}: packageUrl must be https`);
-              process.exit(1);
-            }
-          }
-          console.log(`index.json OK (${ids.length} plugin${ids.length === 1 ? "" : "s"})`);
-          EOF
-
-      - name: Check every published plugin has a catalog entry
-        run: |
-          node - << 'EOF'
-          const { readFileSync } = require("fs");
-          const { plugins } = require("./index.json");
-          const catalog = readFileSync("docs/plugin-catalog.md", "utf8");
-          const missing = plugins.filter((p) => !catalog.includes("`" + p.id + "`"));
-          if (missing.length) {
-            console.error(
-              "docs/plugin-catalog.md is missing entries for:\n" +
-                missing.map((p) => `  ${p.id}`).join("\n"),
-            );
-            process.exit(1);
-          }
-          console.log("catalog OK");
-          EOF
+          if git diff --quiet -- index.json docs/plugin-catalog.md; then
+            echo "generated files already current"
+            exit 0
+          fi
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add index.json docs/plugin-catalog.md
+          git commit -m "chore: regenerate index and catalog"
+          git push
