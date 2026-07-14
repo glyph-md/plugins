@@ -30,10 +30,10 @@ jobs:
         if: github.event_name == 'pull_request'
         run: |
           git fetch --depth=1 origin "${{ github.base_ref }}"
-          if ! git diff --quiet "origin/${{ github.base_ref }}" HEAD -- index.json docs/plugin-catalog.md; then
-            echo "index.json and docs/plugin-catalog.md are generated from plugins/*/plugin.json."
+          if ! git diff --quiet "origin/${{ github.base_ref }}" HEAD -- index.json index docs/plugin-catalog.md; then
+            echo "index.json, index/, and docs/plugin-catalog.md are generated from plugins/*/plugin.json."
             echo "Do not edit them in a PR; they are regenerated automatically on merge to main."
-            git diff --stat "origin/${{ github.base_ref }}" HEAD -- index.json docs/plugin-catalog.md
+            git diff --stat "origin/${{ github.base_ref }}" HEAD -- index.json index docs/plugin-catalog.md
             exit 1
           fi
 
@@ -46,12 +46,12 @@ jobs:
       - name: Commit regenerated files on main
         if: github.event_name == 'push' && github.ref == 'refs/heads/main'
         run: |
-          if git diff --quiet -- index.json docs/plugin-catalog.md; then
+          if git diff --quiet -- index.json index docs/plugin-catalog.md; then
             echo "generated files already current"
             exit 0
           fi
           git config user.name "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
-          git add index.json docs/plugin-catalog.md
+          git add index.json index docs/plugin-catalog.md
           git commit -m "chore: regenerate index and catalog"
           git push

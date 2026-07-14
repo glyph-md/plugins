@@ -1,0 +1,50 @@
+name: Docs site
+
+# Publish the plugin docs, the catalog, and every plugin's README as a static
+# website rendered by Glyph itself (the workspace website export), deployed to
+# GitHub Pages at glyph-md.github.io/plugins.
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - "docs/**"
+      - "plugins/**"
+      - "README.md"
+      - "CONTRIBUTING.md"
+      - ".github/workflows/docs-site.yml"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  pages: write
+  id-token: write
+
+concurrency:
+  group: docs-site
+  cancel-in-progress: true
+
+jobs:
+  publish:
+    runs-on: ubuntu-latest
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    steps:
+      - uses: actions/checkout@v5
+
+      # The whole repo is the workspace: docs/ pages, the generated catalog,
+      # and each plugin's README all cross-link, so exporting the root keeps
+      # every relative link resolvable. The dictionary's Hunspell assets are
+      # not markdown and are not exported.
+      - uses: glyph-md/export-website-action@v1
+        with:
+          workspace: .
+          output: site
+
+      - uses: actions/upload-pages-artifact@v4
+        with:
+          path: site
+
+      - id: deployment
+        uses: actions/deploy-pages@v4

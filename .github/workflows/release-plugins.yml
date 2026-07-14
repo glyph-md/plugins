@@ -1,0 +1,49 @@
+name: Release official plugins
+
+# When an official plugin's version is bumped on main and no matching release
+# exists, package it (manifest + declared files), create the release, rewrite
+# the registration's packageUrl + sha256, regenerate the index and catalog,
+# and push it all as one bot commit. Maintainers only edit source + versions.
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - "plugins/**"
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+concurrency:
+  group: release-plugins
+  cancel-in-progress: false
+
+jobs:
+  release:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v5
+        with:
+          fetch-depth: 0
+
+      - name: Package and release changed official plugins
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: node scripts/release-official.mjs
+
+      - name: Regenerate index and catalog
+        run: node scripts/build-index.mjs
+
+      - name: Commit registration and index updates
+        run: |
+          if git diff --quiet; then
+            echo "nothing changed"
+            exit 0
+          fi
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add plugins index.json index docs/plugin-catalog.md
+          git commit -m "chore: release official plugin packages and regenerate the index"
+          git pull --rebase origin main
+          git push

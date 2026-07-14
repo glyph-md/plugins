@@ -27,6 +27,9 @@ glyph-md/plugins (plugins/<id>/) ────────┘
 - Registrations live one-per-folder under `plugins/<id>/`; CI generates `index.json` from them on merge. The app fetches that `index.json` from this repo's `main` branch to list marketplace plugins, detect updates (version diff), and install: the `packageUrl` zip is downloaded, verified against `sha256`, and only its manifest-declared files are copied out.
 - Plugin code itself is **not** hosted here (except official plugins like Hello Status); each entry's `packageUrl` points at a release asset in the plugin's own repo, pinned to a tag.
 - The template ships type declarations that mirror the host's `ctx`, so plugin authors get autocomplete without a runtime dependency.
+- These docs, the catalog, and every plugin README are published as a website at [glyph-md.github.io/plugins](https://glyph-md.github.io/plugins/), rendered by Glyph's own website export on every merge (dogfooding the export-website action).
+- Alongside the aggregate `index.json`, the generator emits `index/<category>.json` shards and `index/meta.json` (per-category counts), so clients can fetch one section instead of everything once the catalog grows.
+- Official plugin packages are built and released by CI: bump the version in an official plugin's `manifest.json` + `plugin.json` and the release workflow zips the declared files, publishes the tagged release, rewrites `packageUrl`/`sha256`, and regenerates the index in one bot commit.
 
 ## Version flow
 

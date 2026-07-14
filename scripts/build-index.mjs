@@ -3,7 +3,7 @@
 // Both outputs are generated files: don't hand-edit them. CI regenerates them
 // on every merge to main and rejects PRs that modify them directly.
 
-import { readdirSync, readFileSync, writeFileSync } from "node:fs";
+import { mkdirSync, readdirSync, readFileSync, writeFileSync } from "node:fs";
 import { join } from "node:path";
 import { fileURLToPath } from "node:url";
 
@@ -39,6 +39,20 @@ const index = {
 };
 writeFileSync(join(root, "index.json"), `${JSON.stringify(index, null, 2)}\n`);
 
+// index/<category>.json shards + index/meta.json: clients that outgrow the
+// aggregate can fetch one category (or just the counts) instead of everything.
+mkdirSync(join(root, "index"), { recursive: true });
+const meta = { categories: {} };
+for (const category of Object.keys(CATEGORY_LABELS)) {
+  const shard = entries.filter((e) => e.category === category);
+  meta.categories[category] = shard.length;
+  writeFileSync(
+    join(root, "index", `${category}.json`),
+    `${JSON.stringify({ plugins: shard }, null, 2)}\n`,
+  );
+}
+writeFileSync(join(root, "index", "meta.json"), `${JSON.stringify(meta, null, 2)}\n`);
+
 // docs/plugin-catalog.md: grouped by category, one blurb per plugin linking
 // its folder README (the full catalog page).
 const byCategory = new Map();
@@ -67,4 +81,4 @@ for (const [category, list] of [...byCategory.entries()].sort()) {
   }
 }
 writeFileSync(join(root, "docs", "plugin-catalog.md"), catalog);
-console.log(`generated index.json (${entries.length} plugins) and docs/plugin-catalog.md`);
+console.log(`generated index.json + category shards (${entries.length} plugins) and docs/plugin-catalog.md`);

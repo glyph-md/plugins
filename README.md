@@ -55,6 +55,6 @@ Open a pull request that adds (or bumps) your entry in `index.json`. See [CONTRI
 
 ## Plugin API
 
-**Writing a plugin? Start at the [docs hub](docs/) ([Getting Started](docs/getting-started.md) · [Recipes](docs/recipes.md) · [API Reference](docs/api-reference.md) · [Publishing](docs/publishing.md) · [Catalog](docs/plugin-catalog.md)).**
+**Writing a plugin? Browse the [docs site](https://glyph-md.github.io/plugins/) (rendered by Glyph itself) or start at the [docs hub](docs/) ([Getting Started](docs/getting-started.md) · [Recipes](docs/recipes.md) · [API Reference](docs/api-reference.md) · [Publishing](docs/publishing.md) · [Catalog](docs/plugin-catalog.md)).**
 
 Plugins are plain ES modules that default-export `{ activate(ctx) }`. The context gives a plugin commands, status bar items, notifications, translations, and markdown rendering (remark/rehype plugins + fenced renderers). A worked sample lives in this repo: [`com.glyph.hello-status/`](com.glyph.hello-status/), and the [plugin template](https://github.com/glyph-md/plugin-template) scaffolds a new one. The design and roadmap are tracked in [glyph#109](https://github.com/hamidfzm/glyph/issues/109).
