@@ -14,7 +14,7 @@ The marketplace registers each plugin as one folder: `plugins/<id>/` holding a `
      "name": "Example",
      "description": "What it does, in one line.",
      "version": "1.0.0",
-     "apiVersion": "0.16.0",
+     "apiVersion": "0.17.0",
      "category": "tools",
      "keywords": ["example"],
      "packageUrl": "https://github.com/yourname/glyph-example/releases/download/v1.0.0/plugin.zip",
@@ -61,7 +61,7 @@ Cut a new release in your repo, then open a PR that bumps `version`, `packageUrl
 | `name` | Short, human-readable. |
 | `description` | One line, no trailing period needed. Optional but recommended. |
 | `version` | Valid semver (`MAJOR.MINOR.PATCH`). Must increase when `packageUrl` changes. |
-| `apiVersion` | The Glyph plugin-API version you built against (currently `0.16.0`); exact match required until 1.0. |
+| `apiVersion` | The Glyph plugin-API version you built against (currently `0.17.0`); exact match required until 1.0. |
 | `category` | One of `themes`, `markdown`, `exporters`, `tools`, `integrations`, `language`, `ai`. Drives the marketplace filter and the catalog grouping. |
 | `packageUrl` | HTTPS URL to the release zip (manifest + declared files). **Pin it to a tag**, not a moving branch: the `sha256` digest is verified before install, and only the manifest-declared files are extracted. |
 

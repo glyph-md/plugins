@@ -66,7 +66,7 @@ Use **Manage Plugins…** to enable/disable or remove it. To ship it to other us
 | `id` | yes | Reverse-DNS id; also the install folder name (letters, digits, `.`, `_`, `-`) |
 | `name` | yes | Display name |
 | `version` | yes | The plugin's semver |
-| `apiVersion` | yes | Glyph plugin-API version; exact match required until 1.0 (currently `0.16.0`) |
+| `apiVersion` | yes | Glyph plugin-API version; exact match required until 1.0 (currently `0.17.0`) |
 | `description` | no | One-line summary |
 | `main` | no | Entry file name, defaults to `main.js` |
 | `files` | no | Every file the plugin consists of (must include `main`), e.g. `["main.js", "assets/fa.dic"]`. Required to ship assets: installs copy exactly this list and `ctx.assets` reads are limited to it |

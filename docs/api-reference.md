@@ -1,4 +1,4 @@
-# API Reference (0.16.0)
+# API Reference (0.17.0)
 
 A plugin default-exports `{ activate(ctx), deactivate? }`. `activate` receives the **plugin context** (`ctx`), the only door to the host. Every `register*` call returns a **disposer** and is also auto-removed on unload, so you rarely call disposers yourself.
 
@@ -11,7 +11,7 @@ export interface PluginModule {
 
 ## `ctx.apiVersion`
 
-The host's plugin-API version (string), currently `0.16.0`. The API is unstable until 1.0: your manifest's `apiVersion` must equal the host version exactly (a caret grants nothing below 1.0), and any bump may break plugins. Normal caret ranges start at 1.0.0.
+The host's plugin-API version (string), currently `0.17.0`. The API is unstable until 1.0: your manifest's `apiVersion` must equal the host version exactly (a caret grants nothing below 1.0), and any bump may break plugins. Normal caret ranges start at 1.0.0.
 
 ## `ctx.commands`
 
@@ -100,6 +100,18 @@ ctx.exporters.register({
 });
 ```
 
+### `ctx.exporters.registerSiteTheme` (API 0.17)
+
+Contribute a theme for the website export (File > Export > Website, or the `--export-website` CLI). The CSS is appended to the exported site's shared `style.css` after the built-in chrome, so it can restyle the site header (`.glyph-site-header`), the navigation tree (`.glyph-site-nav`), the outline column (`.glyph-site-outline`), and the `.markdown-body` content. Workspaces select a theme with the `theme` field of `.glyph/site.json`; the built-ins are `github` (default) and `plain`, and a plugin cannot override those ids.
+
+```ts
+ctx.exporters.registerSiteTheme({
+  id: "solarized",
+  label: "Solarized",
+  css: ".glyph-site-header { background: #fdf6e3; }",
+});
+```
+
 ## `ctx.markdown`
 
 Extend how documents render.
@@ -178,7 +190,7 @@ Declare `"sandbox": true` in `manifest.json` to run your plugin in an isolated w
   "id": "com.you.fetcher",
   "name": "Fetcher",
   "version": "1.0.0",
-  "apiVersion": "0.16.0",
+  "apiVersion": "0.17.0",
   "sandbox": true,
   "permissions": ["network:api.example.com"]
 }
