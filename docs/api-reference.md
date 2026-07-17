@@ -160,6 +160,8 @@ ctx.spellcheck.registerDictionary({
 
 Real dictionaries are megabytes of Hunspell text; ship them as package assets and read them with `ctx.assets` (see the [recipe](recipes.md#spell-check-dictionary)) rather than embedding them in `main.js`.
 
+The optional `scripts` field declares the ISO 15924 script codes the dictionary covers, e.g. `scripts: ["Arab"]`. When omitted the host infers it from `language` via CLDR likely-subtags, so `fa` already covers Arabic-script words. Words are checked only against dictionaries covering their script and skipped entirely when no enabled dictionary does, which keeps mixed-language notes clean. Casing is normalized, composite codes (`Jpan`, `Kore`, `Hans`, `Hant`) expand to their constituent scripts, and an unknown name logs a warning and contributes no coverage. Hosts that predate the field ignore it and infer instead, so declaring it is always safe.
+
 ## `ctx.notify`
 
 ```ts
