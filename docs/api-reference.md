@@ -11,7 +11,7 @@ export interface PluginModule {
 
 ## `ctx.apiVersion`
 
-The host's plugin-API version (string), currently `0.17.0`. The API is unstable until 1.0: your manifest's `apiVersion` must equal the host version exactly (a caret grants nothing below 1.0), and any bump may break plugins. Normal caret ranges start at 1.0.0.
+The host's plugin-API version (string), currently `0.17.0`. The API is unstable until 1.0: the host accepts any manifest `apiVersion` inside its compatibility window (floor `0.16.0` through the current version). The floor moves only on a breaking contract change and the current version only when the contract gains surface, so plugins built against an older compatible contract keep loading without a republish. A caret grants nothing below 1.0; normal caret ranges start at 1.0.0.
 
 ## `ctx.commands`
 
