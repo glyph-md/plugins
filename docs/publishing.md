@@ -33,4 +33,4 @@ Cut a new release, then open a PR that bumps `version`, `packageUrl` (to the new
 ## Versioning
 
 - `version`: your plugin's semver; must increase when `packageUrl` changes.
-- `apiVersion`: the Glyph plugin-API version you built against (currently `0.16.0`). Until the API reaches 1.0 it must match the host exactly; Glyph refuses to load anything else, so retest and republish when the API version bumps.
+- `apiVersion`: the Glyph version you built against. Until the API reaches 1.0, Glyph accepts any version from its compatibility floor (currently `0.16.0`) up to the running app version, so new releases do not force a republish; retest and republish only when the floor moves past your declared version (a breaking contract change).

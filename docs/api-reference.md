@@ -11,7 +11,7 @@ export interface PluginModule {
 
 ## `ctx.apiVersion`
 
-The host's plugin-API version (string), currently `0.17.0`. The API is unstable until 1.0: your manifest's `apiVersion` must equal the host version exactly (a caret grants nothing below 1.0), and any bump may break plugins. Normal caret ranges start at 1.0.0.
+The host's plugin-API version (string): the Glyph app version itself. The API is unstable until 1.0: the host accepts any manifest `apiVersion` inside its compatibility window, from the floor (`0.16.0`) up to the app version. Every release widens the window at the top and only a breaking contract change moves the floor, so plugins built against an older compatible contract keep loading without a republish. A caret grants nothing below 1.0; normal caret ranges start at 1.0.0.
 
 ## `ctx.commands`
 
