@@ -185,7 +185,7 @@ ctx.registerTranslations("de", "myplugin", { greeting: "Hallo" });
 
 ## Sandboxed plugins
 
-Declare `"sandbox": true` in `manifest.json` to run your plugin in an isolated worker instead of the app context:
+Plugins run sandboxed by default: a `manifest.json` without a `sandbox` flag (or with `"sandbox": true`) runs in an isolated worker instead of the app context. Declaring `"sandbox": false` opts out into full trust; Glyph shows users a separate full-access warning they must explicitly accept before the plugin runs (persisted per plugin), and updates that request new permissions ask again. Only declare `"sandbox": false` when your plugin genuinely needs the main-context APIs listed below.
 
 ```json
 {
@@ -205,9 +205,9 @@ Inside the sandbox:
 - The available API subset is: `ctx.commands`, `ctx.ui.addStyles`, `ctx.exporters`, `ctx.workspace` (still requires `workspace:read`), `ctx.assets`, `ctx.settings`, `ctx.notify`, and `ctx.registerTranslations`.
 - Not available: `ctx.markdown` and the DOM-mount APIs (`addStatusBarItem`, `addSidebarPanel`, `addSettingsPanel`), because they cannot cross the worker boundary.
 
-Prefer the sandbox when your plugin needs network access or doesn't touch the UI; users can trust it with less.
+Prefer the sandbox (the default) when your plugin needs network access or doesn't touch the UI; users can trust it with less.
 
 ## Not available yet
 
-No shell or `invoke` access; filesystem access only through the permission-gated `ctx.workspace`. In the main (non-sandboxed) context there is no network gating, so network-using plugins should opt into the sandbox. More capabilities are tracked on the [roadmap](https://github.com/hamidfzm/glyph/issues/109).
+No shell or `invoke` access; filesystem access only through the permission-gated `ctx.workspace`. In the full-trust (`"sandbox": false`) context there is no network gating, which is exactly why that mode requires an explicit user grant. More capabilities are tracked on the [roadmap](https://github.com/hamidfzm/glyph/issues/109).
  

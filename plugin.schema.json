@@ -57,7 +57,7 @@
     },
     "sandbox": {
       "type": "boolean",
-      "description": "Run the plugin in an isolated worker (no DOM, network fenced to its network: permissions)."
+      "description": "Run the plugin in an isolated worker (no DOM, network fenced to its network: permissions). Defaults to true when absent; only an explicit false opts into full trust, which users must approve through a separate full-access warning."
     },
     "packageUrl": {
       "type": "string",
