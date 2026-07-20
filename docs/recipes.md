@@ -210,7 +210,7 @@ export default {
 
 ## Sandboxed network plugin
 
-Set `"sandbox": true` and declare the hosts you call; `fetch` is fenced to them and the plugin runs in a worker with no DOM. See [the API reference](api-reference.md#sandboxed-plugins) for the available ctx subset.
+Plugins run sandboxed by default (a worker with no DOM); just declare the hosts you call and `fetch` is fenced to them. See [the API reference](api-reference.md#sandboxed-plugins) for the available ctx subset.
 
 ```json
 {

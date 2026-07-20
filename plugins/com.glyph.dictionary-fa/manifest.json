@@ -4,6 +4,7 @@
   "description": "Persian (Farsi) spell-check dictionary, based on the Lilak project.",
   "version": "1.0.0",
   "apiVersion": "0.16.0",
+  "sandbox": false,
   "main": "main.js",
   "files": ["main.js", "assets/fa.aff", "assets/fa.dic"],
   "permissions": []
