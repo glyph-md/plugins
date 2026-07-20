@@ -68,7 +68,7 @@
         },
         "sandbox": {
           "type": "boolean",
-          "description": "Run the plugin in an isolated worker (no DOM, network fenced to its network: permissions). Only the non-UI API subset is available; see the docs."
+          "description": "Run the plugin in an isolated worker (no DOM, network fenced to its network: permissions). Defaults to true when absent; only an explicit false marks a full-trust plugin, which users must approve through a separate full-access warning. Only the non-UI API subset is available in the sandbox; see the docs."
         },
         "packageUrl": {
           "type": "string",

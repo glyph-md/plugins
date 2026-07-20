@@ -1,6 +1,6 @@
 # Glyph Plugin Docs
 
-Glyph plugins are small JavaScript modules that extend the app: command-palette commands, status bar items, sidebar and settings panels, markdown rendering, exporters, styles, translations, and notifications. They run through a single capability object (`ctx`), never with direct filesystem or shell access, and can opt into a network-fenced worker sandbox.
+Glyph plugins are small JavaScript modules that extend the app: command-palette commands, status bar items, sidebar and settings panels, markdown rendering, exporters, styles, translations, and notifications. They run through a single capability object (`ctx`), never with direct filesystem or shell access, and run in a network-fenced worker sandbox by default.
 
 ## Where to go
 
