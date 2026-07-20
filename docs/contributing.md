@@ -25,7 +25,7 @@ The delivery plan lived in [hamidfzm/glyph#109](https://github.com/hamidfzm/glyp
 - **A: Markdown pipeline**: remark/rehype plugins, fenced code-block renderers
 - **B: Trust**: declared permissions, install consent, permission-gated workspace API
 - **C/D: Surface growth**: sidebar panels, settings panels, exporters, per-plugin settings, translations, `addStyles`, spell-check dictionaries
-- **E: Distribution hardening**: index CI validation, sha256 download verification, and the opt-in worker sandbox
+- **E: Distribution hardening**: index CI validation, sha256 download verification, and the worker sandbox (now the default; full trust is an explicit, user-granted opt-out)
 
 All phases are complete; new work is incremental API/proposal-driven.
 
