@@ -26,14 +26,20 @@ jobs:
             [ "$declared" = "$id" ] || { echo "$id: plugin.json declares id \"$declared\"; the folder name must equal the id"; exit 1; }
           done
 
-      - name: Reject hand edits to generated files in PRs
+      # Comparing against the base branch would reject a PR that changes the
+      # generator itself, since its output legitimately moves with it. Compare
+      # against a fresh run instead: hand edits still fail, generator changes
+      # pass as long as the committed output was regenerated.
+      - name: Check the generated files match the generator
         if: github.event_name == 'pull_request'
         run: |
-          git fetch --depth=1 origin "${{ github.base_ref }}"
-          if ! git diff --quiet "origin/${{ github.base_ref }}" HEAD -- index.json index docs/plugin-catalog.md; then
+          node scripts/build-index.mjs
+          if ! git diff --quiet -- index.json index docs/plugin-catalog.md; then
             echo "index.json, index/, and docs/plugin-catalog.md are generated from plugins/*/plugin.json."
-            echo "Do not edit them in a PR; they are regenerated automatically on merge to main."
-            git diff --stat "origin/${{ github.base_ref }}" HEAD -- index.json index docs/plugin-catalog.md
+            echo "What this PR commits does not match what scripts/build-index.mjs produces."
+            echo "Do not hand-edit them; change plugins/<id>/plugin.json (or the generator) and rerun:"
+            echo "  node scripts/build-index.mjs"
+            git diff --stat -- index.json index docs/plugin-catalog.md
             exit 1
           fi
 

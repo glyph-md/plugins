@@ -54,7 +54,8 @@ for (const category of Object.keys(CATEGORY_LABELS)) {
 writeFileSync(join(root, "index", "meta.json"), `${JSON.stringify(meta, null, 2)}\n`);
 
 // docs/plugin-catalog.md: grouped by category, one blurb per plugin linking
-// its folder README (the full catalog page).
+// its folder README on GitHub. Absolute links: the docs site exports only
+// docs/, so registration folders have no pages there.
 const byCategory = new Map();
 for (const e of entries) {
   const list = byCategory.get(e.category) ?? [];
@@ -65,7 +66,7 @@ let catalog = `# Plugin Catalog
 
 <!-- GENERATED FILE: do not edit. Run \`node scripts/build-index.mjs\` after changing any plugins/<id>/plugin.json. -->
 
-Every published plugin, grouped by category. Each entry links the plugin's own README (its catalog page, kept next to its registration in \`plugins/<id>/\`).
+Every published plugin, grouped by category. Each entry links the plugin's own README on GitHub (its catalog page, kept next to its registration in \`plugins/<id>/\`).
 `;
 for (const [category, list] of [...byCategory.entries()].sort()) {
   catalog += `\n## ${CATEGORY_LABELS[category] ?? category}\n`;
@@ -77,7 +78,7 @@ for (const [category, list] of [...byCategory.entries()].sort()) {
     ]
       .filter(Boolean)
       .join(" · ");
-    catalog += `\n### [${e.name}](../plugins/${e.id}/README.md)\n\n\`${e.id}\` v${e.version} · ${badges}\n\n${e.description ?? ""}\n`;
+    catalog += `\n### [${e.name}](https://github.com/glyph-md/plugins/tree/main/plugins/${e.id})\n\n\`${e.id}\` v${e.version} · ${badges}\n\n${e.description ?? ""}\n`;
   }
 }
 writeFileSync(join(root, "docs", "plugin-catalog.md"), catalog);
