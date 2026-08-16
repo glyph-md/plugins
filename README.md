@@ -2,6 +2,8 @@
 
 The official plugin marketplace for [Glyph](https://github.com/hamidfzm/glyph), a cross-platform markdown viewer.
 
+📖 **Docs site: [glyph-md.github.io/plugins](https://glyph-md.github.io/plugins/)**, the `docs/` pages and the catalog rendered by Glyph itself. Start at [Getting Started](docs/getting-started.md), or browse [Recipes](docs/recipes.md), the [API Reference](docs/api-reference.md), [Publishing](docs/publishing.md), and the [Catalog](docs/plugin-catalog.md).
+
 This repository registers plugins: one folder each under [`plugins/`](plugins) holding a `plugin.json` (id, category, packageUrl, sha256, …) and a `README.md` catalog page. [`index.json`](index.json) is **generated** from those registrations, and Glyph reads it to discover, install, and update plugins. **Community plugin code lives in each plugin's own repository**; official plugins keep their source next to their registration here.
 
 ## For users
@@ -32,7 +34,8 @@ On launch Glyph fetches `index.json` from this repo's `main` branch over HTTPS (
   "name": "Example",
   "description": "What it does, in one line.",
   "version": "1.0.0",
-  "apiVersion": "^1.0.0",
+  "apiVersion": "0.16.0",
+  "category": "tools",
   "packageUrl": "https://github.com/author/glyph-example/releases/download/v1.0.0/plugin.zip",
   "sha256": "<hex digest of plugin.zip>"
 }
@@ -42,19 +45,23 @@ On launch Glyph fetches `index.json` from this repo's `main` branch over HTTPS (
 |---|---|---|
 | `id` | yes | Unique reverse-DNS id; also the install folder name (letters, digits, `.`, `_`, `-`) |
 | `name` | yes | Display name shown in the palette |
-| `description` | no | One-line summary |
 | `version` | yes | The plugin's current semver; bumping it triggers the in-app update prompt |
-| `apiVersion` | yes | Glyph plugin-API range the plugin targets, e.g. `^1.0.0` |
-| `packageUrl` | yes | URL of the release zip: `manifest.json` plus the manifest-declared files |
+| `apiVersion` | yes | The Glyph plugin-API version the plugin was built against. Until the API reaches 1.0 the host accepts anything inside its compatibility window, from the floor (`0.16.0`) up to the running app version |
+| `category` | yes | One of `themes`, `markdown`, `exporters`, `tools`, `integrations`, `language`, `ai`; drives the marketplace filter |
+| `packageUrl` | yes | HTTPS URL of the release zip (`manifest.json` plus the manifest-declared files), pinned to a tag |
+| `sha256` | yes | Digest of that zip, verified before install |
+| `description` | no | One-line summary |
+| `sandbox` | no | Defaults to `true` (isolated worker, network fenced to the plugin's `network:` permissions); an explicit `false` marks a full-trust plugin users must approve separately |
+| `permissions` | no | Capabilities shown in the install consent prompt |
+| `keywords` | no | Extra search terms for the marketplace |
+| `official` | no | Maintained and released from this repo |
 
 Entries are validated against [`index.schema.json`](index.schema.json).
 
 ## Publishing a plugin
 
-Open a pull request that adds (or bumps) your entry in `index.json`. See [CONTRIBUTING.md](CONTRIBUTING.md) for the full guide, the entry rules, and the review criteria.
+Open a pull request that adds `plugins/<your-id>/plugin.json` and `plugins/<your-id>/README.md` (to update, bump `version`, `packageUrl`, and `sha256` in that same file). `index.json` and the catalog are regenerated on merge, so never edit them by hand. See [CONTRIBUTING.md](CONTRIBUTING.md) for the full guide, the entry rules, and the review criteria.
 
 ## Plugin API
 
-**Writing a plugin? Browse the [docs site](https://glyph-md.github.io/plugins/) (rendered by Glyph itself) or start at the [docs hub](docs/) ([Getting Started](docs/getting-started.md) · [Recipes](docs/recipes.md) · [API Reference](docs/api-reference.md) · [Publishing](docs/publishing.md) · [Catalog](docs/plugin-catalog.md)).**
-
-Plugins are plain ES modules that default-export `{ activate(ctx) }`. The context gives a plugin commands, status bar items, notifications, translations, and markdown rendering (remark/rehype plugins + fenced renderers). A worked sample lives in this repo: [`com.glyph.hello-status/`](com.glyph.hello-status/), and the [plugin template](https://github.com/glyph-md/plugin-template) scaffolds a new one. The design and roadmap are tracked in [glyph#109](https://github.com/hamidfzm/glyph/issues/109).
+Plugins are plain ES modules that default-export `{ activate(ctx) }`. The context gives a plugin commands, status bar items, notifications, translations, and markdown rendering (remark/rehype plugins + fenced renderers). A worked sample lives in this repo: [`plugins/com.glyph.hello-status/`](plugins/com.glyph.hello-status/README.md), and the [plugin template](https://github.com/glyph-md/plugin-template) scaffolds a new one. The design and roadmap are tracked in [glyph#109](https://github.com/hamidfzm/glyph/issues/109).

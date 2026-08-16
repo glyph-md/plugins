@@ -61,9 +61,11 @@ Cut a new release in your repo, then open a PR that bumps `version`, `packageUrl
 | `name` | Short, human-readable. |
 | `description` | One line, no trailing period needed. Optional but recommended. |
 | `version` | Valid semver (`MAJOR.MINOR.PATCH`). Must increase when `packageUrl` changes. |
-| `apiVersion` | The Glyph plugin-API version you built against (currently `0.17.0`); exact match required until 1.0. |
+| `apiVersion` | The Glyph plugin-API version you built against. Until the API reaches 1.0 the host loads anything inside its compatibility window, from the floor (`0.16.0`) up to the running app version, so a new Glyph release does not force a republish. A caret grants nothing below 1.0. |
 | `category` | One of `themes`, `markdown`, `exporters`, `tools`, `integrations`, `language`, `ai`. Drives the marketplace filter and the catalog grouping. |
 | `packageUrl` | HTTPS URL to the release zip (manifest + declared files). **Pin it to a tag**, not a moving branch: the `sha256` digest is verified before install, and only the manifest-declared files are extracted. |
+| `sha256` | Hex digest of the `packageUrl` zip. Glyph verifies the download against it before installing. |
+| `sandbox` | Optional, defaults to `true`: an isolated worker with network fenced to your `network:` permissions. Set `false` only if you need main-context APIs; users must then accept a separate full-access warning. |
 
 ## Review criteria
 
