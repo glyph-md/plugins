@@ -8,7 +8,7 @@ Every published plugin, grouped by category. Each entry links the plugin's own R
 
 ### [Persian Dictionary](https://github.com/glyph-md/plugins/tree/main/plugins/com.glyph.dictionary-fa)
 
-`com.glyph.dictionary-fa` v1.0.0 · official · no permissions
+`com.glyph.dictionary-fa` v1.0.0 · official · sandboxed · no permissions
 
 Persian (Farsi) spell-check dictionary, based on the Lilak project.
 
@@ -16,6 +16,6 @@ Persian (Farsi) spell-check dictionary, based on the Lilak project.
 
 ### [Hello Status](https://github.com/glyph-md/plugins/tree/main/plugins/com.glyph.hello-status)
 
-`com.glyph.hello-status` v1.0.0 · official · no permissions
+`com.glyph.hello-status` v1.1.0 · official · full trust · no permissions
 
 Sample plugin: a status bar greeting and a command palette entry.

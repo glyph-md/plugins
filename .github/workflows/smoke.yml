@@ -1,0 +1,17 @@
+name: Smoke
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+
+# CI-time smoke tests for the scripts that publish this registry: they drive the
+# real release script end to end against a throwaway repo whose `gh` is a stub,
+# as opposed to validate.yml, which checks the registry data itself.
+jobs:
+  scripts:
+    name: Scripts
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v5
+      - run: node --test
