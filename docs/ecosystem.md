@@ -33,11 +33,12 @@ glyph-md/plugins (plugins/<id>/) ────────┘
 
 ## Version flow
 
-Three version numbers matter, and they are linked:
+Four version numbers matter, and they are linked:
 
-1. **`PLUGIN_API_VERSION`** in the app (`src/lib/plugins/apiVersion.ts`), pinned at `0.17.0`. Bumped by hand when the API decisions change; unstable until it ships as 1.0.0.
-2. **`apiVersion`** in each plugin's manifest, checked at load time. While the API major is 0 it must fall inside the host's compatibility window (the floor, bumped only on breaking contract changes, through the current version); caret ranges only mean something from 1.0.0.
-3. **`version`** of each plugin: its own semver, used by the marketplace to offer updates.
+1. **`PLUGIN_API_VERSION`** in the app (`src/lib/plugins/apiVersion.ts`), which *is* the app version from `package.json`. It moves on every release, so it is never edited by hand.
+2. **`PLUGIN_API_COMPAT_FLOOR`** next to it, currently `0.16.0`: the oldest declared `apiVersion` the host still runs unchanged. This is the one hand-maintained number, bumped only in a release that breaks the plugin contract.
+3. **`apiVersion`** in each plugin's manifest, checked at load time. While the API major is 0 it must fall inside the window between those two; caret ranges only mean something from 1.0.0.
+4. **`version`** of each plugin: its own semver, used by the marketplace to offer updates.
 
 The maintenance convention: every app PR that changes the plugin API updates, in the same delivery,
 
