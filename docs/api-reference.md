@@ -102,7 +102,7 @@ ctx.exporters.register({
 
 ### `ctx.exporters.registerSiteTheme` (API 0.17)
 
-Contribute a theme for the website export (File > Export > Website, or the `--export-website` CLI). The CSS is appended to the exported site's shared `style.css` after the built-in chrome, so it can restyle the site header (`.glyph-site-header`), the navigation tree (`.glyph-site-nav`), the outline column (`.glyph-site-outline`), and the `.markdown-body` content. Workspaces select a theme with the `theme` field of `.glyph/site.json`; the built-ins are `github` (default) and `plain`, and a plugin cannot override those ids.
+Contribute a theme for the website export (File > Export > Website, or the `--export site --out <dir>` CLI; it was `--export-website <dir>` up to Glyph v0.20.0). The CSS is appended to the exported site's shared `style.css` after the built-in chrome, so it can restyle the site header (`.glyph-site-header`), the navigation tree (`.glyph-site-nav`), the outline column (`.glyph-site-outline`), and the `.markdown-body` content. Workspaces select a theme with the `theme` field of `.glyph/site.json`; the built-ins are `github` (default) and `plain`, and a plugin cannot override those ids.
 
 ```ts
 ctx.exporters.registerSiteTheme({
