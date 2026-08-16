@@ -32,8 +32,8 @@
       ],
       "official": true,
       "sandbox": false,
-      "packageUrl": "https://github.com/glyph-md/plugins/releases/download/com.glyph.hello-status-v1.0.0/com.glyph.hello-status.zip",
-      "sha256": "3ba78f030013fc1d15836df6b1867ec96f13be2ecc07ebc92865fbcfd9875ff6"
+      "packageUrl": "https://github.com/glyph-md/plugins/releases/download/com.glyph.hello-status-v1.1.0/com.glyph.hello-status.zip",
+      "sha256": "148af39e4b7d4404bda7f95be495714e341b5c6b0fda3f124cd1df0bf52ee806"
     }
   ]
 }
