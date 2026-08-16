@@ -22,9 +22,13 @@ jobs:
             test -f "$dir/plugin.json" || { echo "$id: missing plugin.json"; exit 1; }
             test -f "$dir/README.md" || { echo "$id: missing README.md (the catalog page)"; exit 1; }
             npx --yes ajv-cli@5 validate -s plugin.schema.json -d "$dir/plugin.json" --strict=false
-            declared=$(node -p "require('./$dir/plugin.json').id")
-            [ "$declared" = "$id" ] || { echo "$id: plugin.json declares id \"$declared\"; the folder name must equal the id"; exit 1; }
           done
+
+      # The registration is what the marketplace publishes; the manifest is what
+      # ships inside the release zip. Drift between them fails the PR here
+      # instead of the post-merge release job, which no re-run can turn green.
+      - name: Check registrations against their manifests
+        run: node scripts/check-plugins.mjs
 
       # Comparing against the base branch would reject a PR that changes the
       # generator itself, since its output legitimately moves with it. Compare

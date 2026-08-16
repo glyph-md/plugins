@@ -14,6 +14,7 @@ import { execFileSync } from "node:child_process";
 import { existsSync, mkdirSync, readdirSync, readFileSync, writeFileSync } from "node:fs";
 import { join } from "node:path";
 import { fileURLToPath } from "node:url";
+import { checkPlugin, manifestFiles } from "./check-plugins.mjs";
 
 const root = fileURLToPath(new URL("..", import.meta.url));
 const repo = process.env.GITHUB_REPOSITORY ?? "glyph-md/plugins";
@@ -32,16 +33,15 @@ for (const dir of readdirSync(join(root, "plugins"), { withFileTypes: true })) {
   if (!reg.official) continue;
 
   const manifest = JSON.parse(readFileSync(join(folder, "manifest.json"), "utf8"));
-  if (manifest.version !== reg.version) {
-    throw new Error(`${reg.id}: manifest.json version ${manifest.version} != plugin.json version ${reg.version}`);
-  }
+  // The same parity check validate.yml runs on every PR, repeated here because
+  // this is the job that would otherwise ship the mismatch.
+  const problems = checkPlugin(dir.name, reg, manifest, (rel) => existsSync(join(folder, rel)));
+  if (problems.length > 0) throw new Error(problems.join("\n"));
+
   const tag = `${reg.id}-v${reg.version}`;
   if (existingTags.has(tag) || tagExistsOnRemote(tag)) continue;
 
-  const files = manifest.files ?? [manifest.main ?? "main.js"];
-  for (const rel of files) {
-    if (!existsSync(join(folder, rel))) throw new Error(`${reg.id}: declared file ${rel} is missing`);
-  }
+  const files = manifestFiles(manifest);
 
   // bsdtar is not on ubuntu runners by default; Info-ZIP `zip` keeps forward
   // slashes and stores paths relative to the plugin folder.

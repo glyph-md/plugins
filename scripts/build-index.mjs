@@ -73,7 +73,8 @@ for (const [category, list] of [...byCategory.entries()].sort()) {
   for (const e of list) {
     const badges = [
       e.official ? "official" : null,
-      e.sandbox ? "sandboxed" : null,
+      // Sandboxed is the default, so the badge worth showing is the opt-out.
+      e.sandbox === false ? "full trust" : "sandboxed",
       e.permissions?.length ? `permissions: ${e.permissions.join(", ")}` : "no permissions",
     ]
       .filter(Boolean)
