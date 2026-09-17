@@ -1,4 +1,4 @@
-# API Reference (0.17.0)
+# API Reference (0.25.0)
 
 A plugin default-exports `{ activate(ctx), deactivate? }`. `activate` receives the **plugin context** (`ctx`), the only door to the host. Every `register*` call returns a **disposer** and is also auto-removed on unload, so you rarely call disposers yourself.
 
@@ -54,7 +54,7 @@ ctx.ui.addSidebarPanel({
 
 ## `ctx.ui.addSettingsPanel`
 
-One settings UI per plugin, shown under your plugin's row in Manage Plugins while it is enabled. Pair it with `ctx.settings` to persist what the user picks.
+One settings UI per plugin, shown under your plugin's row in Settings, Plugins while it is enabled. Pair it with `ctx.settings` to persist what the user picks.
 
 ```ts
 ctx.ui.addSettingsPanel({
@@ -122,11 +122,32 @@ ctx.markdown.registerRemarkPlugin(myRemarkPlugin);
 ctx.markdown.registerRehypePlugin(myRehypePlugin);
 
 // render a fenced code block of a given language with a React component
-ctx.markdown.registerFencedRenderer("d2", ({ code }) => <D2Diagram source={code} />);
+ctx.markdown.registerFencedRenderer(
+  "plantuml",
+  ({ code, openLightbox }) => <PlantUmlDiagram source={code} onZoom={openLightbox} />,
+  // optional: a light-theme render for print and PDF export (API 0.25)
+  { renderStatic: (code) => renderPlantUmlSvg(code, { theme: "light" }) },
+);
 ```
 
 - Plugin remark/rehype run **after** the built-in pipeline (GFM, math, alerts, wikilinks, sanitize). Plugin code is trusted, so plugin rehype output is not re-sanitized.
-- A fenced renderer handles ` ```<language> ` blocks whose language isn't already built in (mermaid/csv/tsv take precedence). It receives the raw `code` string.
+- A fenced renderer handles ` ```<language> ` blocks whose language isn't already built in (mermaid/csv/tsv take precedence). It receives the raw `code` string. When several plugins register the same language, the first registration wins.
+- **API 0.25:** the component also receives `openLightbox(src, label)` where the document offers click-to-zoom; it is absent during export and print, so only make the render interactive when it is present.
+- **API 0.25:** while an asynchronous render is still pending, set `aria-busy="true"` on its element and clear it when done. Print and every export wait for it.
+- **API 0.25:** `renderStatic(code)` returns markup (typically an SVG) that print and PDF export put on white paper in place of your live render, which may be drawn in the app's dark colors. The host sanitizes it. Without it, the live render is used as is.
+
+## `ctx.documents` (API 0.25)
+
+Open a document type of your own. Files with the extensions you register open read-only, and their whole body renders as one fenced block of `language`, so pair it with a fenced renderer for that language.
+
+```ts
+ctx.documents.registerFileType({ extensions: ["puml"], language: "plantuml" });
+```
+
+- Extensions are matched without the dot and ignoring case; the first registration for an extension wins.
+- The file is fenced at render time, so enabling or disabling your plugin re-renders an open tab in place.
+- Available in the sandbox (it is pure data), though a sandboxed plugin cannot register the fenced renderer itself.
+- Registered extensions are offered by **Open File**. The workspace file tree, relative links, drag and drop, and the operating system's "open with" still cover only the document types built into Glyph.
 
 ## `ctx.workspace`
 
@@ -181,7 +202,7 @@ ctx.registerTranslations("de", "myplugin", { greeting: "Hallo" });
 
 - `activate(ctx)` runs when the plugin loads (startup, install, or re-enable).
 - Everything registered through `ctx` is removed automatically on unload.
-- `deactivate()` runs on unload too — use it only for teardown that doesn't go through a `ctx` disposer.
+- `deactivate()` runs on unload too; use it only for teardown that doesn't go through a `ctx` disposer.
 
 ## Sandboxed plugins
 
@@ -202,7 +223,7 @@ Inside the sandbox:
 
 - There is no DOM and no Tauri access; the plugin talks to the host only through the plugin API.
 - `fetch` works only for hosts covered by your `network:<host>` permissions (the exact host or a subdomain of it). `XMLHttpRequest`, `WebSocket`, and `importScripts` are removed.
-- The available API subset is: `ctx.commands`, `ctx.ui.addStyles`, `ctx.exporters`, `ctx.workspace` (still requires `workspace:read`), `ctx.assets`, `ctx.settings`, `ctx.notify`, and `ctx.registerTranslations`.
+- The available API subset is: `ctx.commands`, `ctx.ui.addStyles`, `ctx.exporters`, `ctx.documents`, `ctx.workspace` (still requires `workspace:read`), `ctx.assets`, `ctx.spellcheck`, `ctx.settings`, `ctx.notify`, and `ctx.registerTranslations`.
 - Not available: `ctx.markdown` and the DOM-mount APIs (`addStatusBarItem`, `addSidebarPanel`, `addSettingsPanel`), because they cannot cross the worker boundary.
 
 Prefer the sandbox (the default) when your plugin needs network access or doesn't touch the UI; users can trust it with less.

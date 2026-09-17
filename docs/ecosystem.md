@@ -31,6 +31,12 @@ glyph-md/plugins (plugins/<id>/) ────────┘
 - Alongside the aggregate `index.json`, the generator emits `index/<category>.json` shards and `index/meta.json` (per-category counts), so clients can fetch one section instead of everything once the catalog grows.
 - Official plugin packages are built and released by CI: bump the version in an official plugin's `manifest.json` + `plugin.json` and the release workflow zips the declared files, publishes the tagged release, rewrites `packageUrl`/`sha256`, and regenerates the index in one bot commit.
 
+## Core and community plugins
+
+Glyph ships some of its own features as **core plugins**: bundled in the app, listed under **Settings, Plugins, Core plugins**, and switched on or off there. A disabled core plugin never loads its code. Core plugins register only through the same public plugin API documented here, so every capability they use is available to community plugins too; when one needs something the API lacks, the API grows first. D2 diagrams are the first core plugin.
+
+The dividing line: a feature is core when it is first-party, works offline, and is useful to most users. It belongs in this marketplace as a community plugin when it is a per-user variant (a spell-check language, a website theme) or depends on a third-party network service. Core plugin ids use the `glyph.core.` prefix, which the app refuses for installed plugins.
+
 ## Version flow
 
 Four version numbers matter, and they are linked:

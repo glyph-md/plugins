@@ -12,7 +12,8 @@ All host code is in [hamidfzm/glyph](https://github.com/hamidfzm/glyph):
 | Worker sandbox (protocol, bootstrap, bridge) | `src/lib/plugins/sandbox/` |
 | Marketplace client (fetch, updates, sha256 verify) | `src/lib/plugins/marketplace.ts` |
 | React wiring (provider, consent, toasts, styles) | `src/contexts/PluginsProvider.tsx`, `src/components/plugins/` |
-| Manage Plugins UI | `src/components/plugins/PluginsModal.tsx` |
+| Plugins tab in Settings (core and community lists, marketplace) | `src/components/plugins/PluginsTab.tsx` |
+| Core plugins (bundled, toggled in Settings) | `src/lib/plugins/corePlugins.ts`, `src/plugins/core/` |
 | Rust commands (scan, install, uninstall) | `src-tauri/src/commands/plugins.rs` |
 
 This repo holds the per-plugin registrations under `plugins/<id>/` (plus the official plugins' source), the schemas, the generated `index.json` and catalog, and the docs. The [template](https://github.com/glyph-md/plugin-template) holds the scaffold and types.
@@ -21,7 +22,7 @@ This repo holds the per-plugin registrations under `plugins/<id>/` (plus the off
 
 The delivery plan lived in [hamidfzm/glyph#109](https://github.com/hamidfzm/glyph/issues/109), shipped as phases:
 
-- **Foundation**: loader (data-URL ESM import), host with per-plugin disposer bags, Rust install/list/uninstall, Manage Plugins modal
+- **Foundation**: loader (data-URL ESM import), host with per-plugin disposer bags, Rust install/list/uninstall, plugin manager UI (now the Plugins tab in Settings)
 - **A: Markdown pipeline**: remark/rehype plugins, fenced code-block renderers
 - **B: Trust**: declared permissions, install consent, permission-gated workspace API
 - **C/D: Surface growth**: sidebar panels, settings panels, exporters, per-plugin settings, translations, `addStyles`, spell-check dictionaries
