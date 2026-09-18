@@ -126,12 +126,18 @@ ctx.markdown.registerFencedRenderer(
   "plantuml",
   {
     mount(el, { code, openLightbox }, registerCleanup) {
-      el.innerHTML = renderPlantUmlSvg(code); // sanitize untrusted output yourself
+      const diagram = document.createElement("div");
+      diagram.innerHTML = renderPlantUmlSvg(code); // sanitize untrusted output yourself
       if (openLightbox) {
-        const zoom = () => openLightbox(svgDataUrl(el.innerHTML), ctx.i18n.t("myplugin:diagram"));
-        el.addEventListener("click", zoom);
-        registerCleanup(() => el.removeEventListener("click", zoom));
+        const zoom = () => openLightbox(svgDataUrl(diagram.innerHTML), ctx.i18n.t("myplugin:diagram"));
+        diagram.setAttribute("role", "button");
+        diagram.tabIndex = 0;
+        diagram.addEventListener("click", zoom);
+        diagram.addEventListener("keydown", (e) => {
+          if (e.key === "Enter" || e.key === " ") zoom();
+        });
       }
+      el.replaceChildren(diagram);
     },
   },
   // optional: a light-theme render for print and PDF export (API 0.25)
@@ -140,11 +146,11 @@ ctx.markdown.registerFencedRenderer(
 ```
 
 - Plugin remark/rehype run **after** the built-in pipeline (GFM, math, alerts, wikilinks, sanitize). Plugin code is trusted, so plugin rehype output is not re-sanitized.
-- A fenced renderer handles ` ```<language> ` blocks whose language isn't already built in (mermaid/csv/tsv take precedence). It receives the raw `code` string. When several plugins register the same language, the first registration wins, and core plugins register before community ones.
-- **API 0.25:** pass a mount object, `{ mount(el, props, registerCleanup) }`, like the panel mounts. It draws into `el` with plain DOM, needs no React, and is mounted again (after your cleanups run) whenever the block's source changes. A plain function returning a string still works, but plugins cannot use React hooks: the host does not share its React.
-- **API 0.25:** the renderer also receives `openLightbox(src, label)` where the document offers click-to-zoom; make the render interactive only when it is present. Exports strip `role="button"`, `tabindex`, and `title` from plugin blocks.
-- **API 0.25:** while an asynchronous render is still pending, set `aria-busy="true"` on its element and clear it when done. Print and every export wait for it.
-- **API 0.25:** `renderStatic(code)` returns markup (typically an SVG) that print and PDF export put on white paper in place of your live render, which may be drawn in the app's dark colors. Wrap it in your own classes if your stylesheet should apply. The host sanitizes it and gives up after 15 seconds. Without it, the live render is used as is.
+- A fenced renderer handles ` ```<language> ` blocks whose language isn't already built in (mermaid/csv/tsv take precedence). It receives the raw `code` string. When several plugins register the same language, the first registration wins; at startup, core plugins register before community ones.
+- **API 0.25:** pass a mount object, `{ mount(el, props, registerCleanup) }`, like the panel mounts. It draws into `el` with plain DOM and needs no React. When the block's source changes, your cleanups run and it is mounted again over its previous output, so an asynchronous renderer can keep the old render on screen and swap it (`el.replaceChildren(...)`) when the new one is ready. A plain function returning a string still works, but plugins cannot use React hooks: the host does not share its React.
+- **API 0.25:** the renderer also receives `openLightbox(src, label)` where the document offers click-to-zoom; make the render interactive only when it is present, keyboard included. Exports strip `tabindex` and `title` from plugin blocks and turn `role="button"` into `role="img"` (or drop it when there is no `aria-label`).
+- **API 0.25:** while an asynchronous render is still pending, set `aria-busy="true"` on `el` (or your element) and clear it when done. Print and every export wait for it.
+- **API 0.25:** `renderStatic(code)` returns markup (typically an SVG) that print and PDF export put on white paper in place of your live render, which may be drawn in the app's dark colors. Wrap it in your own classes if your stylesheet should apply. The host sanitizes it and gives up after 15 seconds; a PDF then shows the block's source. Without it, the live render is used as is.
 
 ## `ctx.documents` (API 0.25)
 
@@ -154,8 +160,8 @@ Open a document type of your own. Files with the extensions you register open re
 ctx.documents.registerFileType({ extensions: ["puml"], language: "plantuml" });
 ```
 
-- Extensions are matched without the dot and ignoring case; the first registration for an extension wins. The language must be a plain word (letters, digits, `.`, `+`, `-`, `_`) and extensions letters and digits; types Glyph opens itself (markdown, notebooks, canvases, images, media) are refused.
-- The file is fenced at render time, so enabling or disabling your plugin re-renders an open tab in place; with no plugin claiming it, the file shows as plain source. Session restore waits for plugins, so a restored tab of your type opens once you have registered it.
+- Extensions are matched without the dot and ignoring case; the first registration for an extension wins. The language is letters, digits, `-`, and `_` (what the ` ```<language> ` lookup matches) and extensions letters and digits; types Glyph opens itself (markdown, notebooks, canvases, images, media) are refused.
+- The file is fenced at render time, so enabling or disabling your plugin re-renders an open tab in place; with no plugin claiming it, the file shows as plain source. Restoring a saved session waits up to five seconds for plugins, so a restored tab of your type opens once you have registered it.
 - Available in the sandbox (it is pure data), though a sandboxed plugin cannot register the fenced renderer itself.
 - Registered extensions are offered by **Open File**. The workspace file tree, relative links, drag and drop, and the operating system's "open with" still cover only the document types built into Glyph.
 
@@ -217,7 +223,7 @@ const label = ctx.i18n.t("myplugin:greeting");
 ctx.i18n.onLanguageChange(() => updateLabels()); // returns a disposer; removed on unload too
 ```
 
-- Keys are `namespace:key`; values use i18next's `{{name}}` interpolation: `ctx.i18n.t("myplugin:hello", { name })`.
+- Keys are `namespace:key`; values use i18next's `{{name}}` interpolation: `ctx.i18n.t("myplugin:hello", { name })`. Values are not HTML-escaped, so set them with `textContent`, not `innerHTML`.
 - Not available in the sandbox (the worker has no copy of the app's strings); sandboxed plugins can still register translations for strings the host shows, such as command titles.
 
 ## Lifecycle
