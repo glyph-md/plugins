@@ -121,20 +121,30 @@ Extend how documents render.
 ctx.markdown.registerRemarkPlugin(myRemarkPlugin);
 ctx.markdown.registerRehypePlugin(myRehypePlugin);
 
-// render a fenced code block of a given language with a React component
+// render a fenced code block of a given language (API 0.25: a mount object)
 ctx.markdown.registerFencedRenderer(
   "plantuml",
-  ({ code, openLightbox }) => <PlantUmlDiagram source={code} onZoom={openLightbox} />,
+  {
+    mount(el, { code, openLightbox }, registerCleanup) {
+      el.innerHTML = renderPlantUmlSvg(code); // sanitize untrusted output yourself
+      if (openLightbox) {
+        const zoom = () => openLightbox(svgDataUrl(el.innerHTML), ctx.i18n.t("myplugin:diagram"));
+        el.addEventListener("click", zoom);
+        registerCleanup(() => el.removeEventListener("click", zoom));
+      }
+    },
+  },
   // optional: a light-theme render for print and PDF export (API 0.25)
-  { renderStatic: (code) => renderPlantUmlSvg(code, { theme: "light" }) },
+  { renderStatic: async (code) => renderPlantUmlSvg(code, { theme: "light" }) },
 );
 ```
 
 - Plugin remark/rehype run **after** the built-in pipeline (GFM, math, alerts, wikilinks, sanitize). Plugin code is trusted, so plugin rehype output is not re-sanitized.
-- A fenced renderer handles ` ```<language> ` blocks whose language isn't already built in (mermaid/csv/tsv take precedence). It receives the raw `code` string. When several plugins register the same language, the first registration wins.
-- **API 0.25:** the component also receives `openLightbox(src, label)` where the document offers click-to-zoom; it is absent during export and print, so only make the render interactive when it is present.
+- A fenced renderer handles ` ```<language> ` blocks whose language isn't already built in (mermaid/csv/tsv take precedence). It receives the raw `code` string. When several plugins register the same language, the first registration wins, and core plugins register before community ones.
+- **API 0.25:** pass a mount object, `{ mount(el, props, registerCleanup) }`, like the panel mounts. It draws into `el` with plain DOM, needs no React, and is mounted again (after your cleanups run) whenever the block's source changes. A plain function returning a string still works, but plugins cannot use React hooks: the host does not share its React.
+- **API 0.25:** the renderer also receives `openLightbox(src, label)` where the document offers click-to-zoom; make the render interactive only when it is present. Exports strip `role="button"`, `tabindex`, and `title` from plugin blocks.
 - **API 0.25:** while an asynchronous render is still pending, set `aria-busy="true"` on its element and clear it when done. Print and every export wait for it.
-- **API 0.25:** `renderStatic(code)` returns markup (typically an SVG) that print and PDF export put on white paper in place of your live render, which may be drawn in the app's dark colors. The host sanitizes it. Without it, the live render is used as is.
+- **API 0.25:** `renderStatic(code)` returns markup (typically an SVG) that print and PDF export put on white paper in place of your live render, which may be drawn in the app's dark colors. Wrap it in your own classes if your stylesheet should apply. The host sanitizes it and gives up after 15 seconds. Without it, the live render is used as is.
 
 ## `ctx.documents` (API 0.25)
 
@@ -144,8 +154,8 @@ Open a document type of your own. Files with the extensions you register open re
 ctx.documents.registerFileType({ extensions: ["puml"], language: "plantuml" });
 ```
 
-- Extensions are matched without the dot and ignoring case; the first registration for an extension wins.
-- The file is fenced at render time, so enabling or disabling your plugin re-renders an open tab in place.
+- Extensions are matched without the dot and ignoring case; the first registration for an extension wins. The language must be a plain word (letters, digits, `.`, `+`, `-`, `_`) and extensions letters and digits; types Glyph opens itself (markdown, notebooks, canvases, images, media) are refused.
+- The file is fenced at render time, so enabling or disabling your plugin re-renders an open tab in place; with no plugin claiming it, the file shows as plain source. Session restore waits for plugins, so a restored tab of your type opens once you have registered it.
 - Available in the sandbox (it is pure data), though a sandboxed plugin cannot register the fenced renderer itself.
 - Registered extensions are offered by **Open File**. The workspace file tree, relative links, drag and drop, and the operating system's "open with" still cover only the document types built into Glyph.
 
@@ -191,12 +201,24 @@ ctx.notify("Saved");   // shows a transient toast
 
 ## `ctx.registerTranslations`
 
-Ship and read your own i18n strings; the bundle is deep-merged into the host's i18n.
+Ship your own i18n strings; the bundle is deep-merged into the host's i18n. Use a namespace of your own (your plugin id works) so no other plugin overwrites your keys.
 
 ```ts
 ctx.registerTranslations("en", "myplugin", { greeting: "Hello" });
 ctx.registerTranslations("de", "myplugin", { greeting: "Hallo" });
 ```
+
+## `ctx.i18n` (API 0.25)
+
+Read the strings you registered, in the app's current language.
+
+```ts
+const label = ctx.i18n.t("myplugin:greeting");
+ctx.i18n.onLanguageChange(() => updateLabels()); // returns a disposer; removed on unload too
+```
+
+- Keys are `namespace:key`; values use i18next's `{{name}}` interpolation: `ctx.i18n.t("myplugin:hello", { name })`.
+- Not available in the sandbox (the worker has no copy of the app's strings); sandboxed plugins can still register translations for strings the host shows, such as command titles.
 
 ## Lifecycle
 
@@ -224,6 +246,7 @@ Inside the sandbox:
 - There is no DOM and no Tauri access; the plugin talks to the host only through the plugin API.
 - `fetch` works only for hosts covered by your `network:<host>` permissions (the exact host or a subdomain of it). `XMLHttpRequest`, `WebSocket`, and `importScripts` are removed.
 - The available API subset is: `ctx.commands`, `ctx.ui.addStyles`, `ctx.exporters`, `ctx.documents`, `ctx.workspace` (still requires `workspace:read`), `ctx.assets`, `ctx.spellcheck`, `ctx.settings`, `ctx.notify`, and `ctx.registerTranslations`.
+- Not available: `ctx.i18n`, which needs the app's strings.
 - Not available: `ctx.markdown` and the DOM-mount APIs (`addStatusBarItem`, `addSidebarPanel`, `addSettingsPanel`), because they cannot cross the worker boundary.
 
 Prefer the sandbox (the default) when your plugin needs network access or doesn't touch the UI; users can trust it with less.

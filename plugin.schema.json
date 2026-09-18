@@ -12,7 +12,7 @@
     },
     "id": {
       "type": "string",
-      "pattern": "^[A-Za-z0-9][A-Za-z0-9._-]*$",
+      "pattern": "^(?![Gg][Ll][Yy][Pp][Hh]\\.[Cc][Oo][Rr][Ee]\\.)[A-Za-z0-9][A-Za-z0-9._-]*$",
       "description": "Unique reverse-DNS id; also the folder name here and the install folder name."
     },
     "name": {
