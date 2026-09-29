@@ -140,17 +140,17 @@ ctx.markdown.registerFencedRenderer(
       el.replaceChildren(diagram);
     },
   },
-  // optional: a light-theme render for print and PDF export (API 0.25)
+  // optional: a light-theme render for print, PDF, and website export (API 0.25)
   { renderStatic: async (code) => renderPlantUmlSvg(code, { theme: "light" }) },
 );
 ```
 
 - Plugin remark/rehype run **after** the built-in pipeline (GFM, math, alerts, wikilinks, sanitize). Plugin code is trusted, so plugin rehype output is not re-sanitized.
-- A fenced renderer handles ` ```<language> ` blocks whose language isn't already built in (mermaid/csv/tsv take precedence). It receives the raw `code` string. When several plugins register the same language, the first registration wins; at startup, core plugins register before community ones.
+- A fenced renderer handles ` ```<language> ` blocks whose language isn't already built in (csv/tsv take precedence). It receives the raw `code` string. When several plugins register the same language, the first registration wins; at startup, core plugins register before community ones, so a community renderer for `mermaid` or `d2` only takes over while that core plugin is switched off.
 - **API 0.25:** pass a mount object, `{ mount(el, props, registerCleanup) }`, like the panel mounts. It draws into `el` with plain DOM and needs no React. When the block's source changes, your cleanups run and it is mounted again over its previous output, so an asynchronous renderer can keep the old render on screen and swap it (`el.replaceChildren(...)`) when the new one is ready. A plain function returning a string still works, but plugins cannot use React hooks: the host does not share its React.
 - **API 0.25:** the renderer also receives `openLightbox(src, label)` where the document offers click-to-zoom; make the render interactive only when it is present, keyboard included. Exports strip `tabindex` and `title` from plugin blocks and turn `role="button"` into `role="img"` (or drop it when there is no `aria-label`).
 - **API 0.25:** while an asynchronous render is still pending, set `aria-busy="true"` on `el` (or your element) and clear it when done. Print and every export wait for it.
-- **API 0.25:** `renderStatic(code)` returns markup (typically an SVG) that print and PDF export put on white paper in place of your live render, which may be drawn in the app's dark colors. Wrap it in your own classes if your stylesheet should apply. The host sanitizes it and gives up after 15 seconds; a PDF then shows the block's source. Without it, the live render is used as is.
+- **API 0.25:** `renderStatic(code)` returns markup (typically an SVG) that print, PDF, and website export put on white paper in place of your live render, which may be drawn in the app's dark colors. Wrap it in your own classes if your stylesheet should apply. The host sanitizes it and gives up after 15 seconds; a PDF or website page then shows the block's source. A website export also drops image references other than `data:` URLs from it, since your markup is not rewritten the way the page's own links are, so inline any images. Without it, the live render is used as is.
 
 ## `ctx.documents` (API 0.25)
 
