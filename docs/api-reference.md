@@ -121,6 +121,12 @@ Extend how documents render.
 ctx.markdown.registerRemarkPlugin(myRemarkPlugin);
 ctx.markdown.registerRehypePlugin(myRehypePlugin);
 
+// API 0.25: a heavy rehype plugin that loads only for documents that need it
+ctx.markdown.registerRehypePlugin({
+  detect: (markdown) => markdown.includes("@startuml"),
+  load: async () => (await import("./rehypePlantUml")).default,
+});
+
 // render a fenced code block of a given language (API 0.25: a mount object)
 ctx.markdown.registerFencedRenderer(
   "plantuml",
@@ -145,7 +151,9 @@ ctx.markdown.registerFencedRenderer(
 );
 ```
 
-- Plugin remark/rehype run **after** the built-in pipeline (GFM, math, alerts, wikilinks, sanitize). Plugin code is trusted, so plugin rehype output is not re-sanitized.
+- Plugin remark/rehype run **after** the built-in pipeline (GFM, alerts, wikilinks, sanitize). Plugin code is trusted, so plugin rehype output is not re-sanitized.
+- **API 0.25:** pass `{ detect, load }` to `registerRehypePlugin` for a plugin too heavy to load at startup. `detect(markdown)` is a cheap check run per document; the first match calls `load()` once, the document re-renders with the plugin, and print and every export wait for the load. A failed load is logged and not retried. The math core plugin loads KaTeX this way.
+- **API 0.25, math:** wrap rendered math in an element carrying its TeX source in `data-math-source`, plus `data-math-display` on block math. PDF export rasterizes the marked blocks, and PDF and Word fall back to the source for inline math. The host strips these attributes from the document's own HTML, so only a plugin can set them.
 - A fenced renderer handles ` ```<language> ` blocks whose language isn't already built in (csv/tsv take precedence). It receives the raw `code` string. When several plugins register the same language, the first registration wins; at startup, core plugins register before community ones, so a community renderer for `mermaid` or `d2` only takes over while that core plugin is switched off.
 - **API 0.25:** pass a mount object, `{ mount(el, props, registerCleanup) }`, like the panel mounts. It draws into `el` with plain DOM and needs no React. When the block's source changes, your cleanups run and it is mounted again over its previous output, so an asynchronous renderer can keep the old render on screen and swap it (`el.replaceChildren(...)`) when the new one is ready. A plain function returning a string still works, but plugins cannot use React hooks: the host does not share its React.
 - **API 0.25:** the renderer also receives `openLightbox(src, label)` where the document offers click-to-zoom; make the render interactive only when it is present, keyboard included. Exports strip `tabindex` and `title` from plugin blocks and turn `role="button"` into `role="img"` (or drop it when there is no `aria-label`).

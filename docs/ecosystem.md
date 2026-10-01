@@ -33,7 +33,7 @@ glyph-md/plugins (plugins/<id>/) ────────┘
 
 ## Core and community plugins
 
-Glyph ships some of its own features as **core plugins**: bundled in the app, listed under **Settings, Plugins, Core plugins**, and switched on or off there. A disabled core plugin never loads its code. Core plugins register only through the same public plugin API documented here, so every capability they use is available to community plugins too; when one needs something the API lacks, the API grows first. D2 and Mermaid diagrams are the first core plugins.
+Glyph ships some of its own features as **core plugins**: bundled in the app, listed under **Settings, Plugins, Core plugins**, and switched on or off there. A disabled core plugin never loads its code. Core plugins register only through the same public plugin API documented here, so every capability they use is available to community plugins too; when one needs something the API lacks, the API grows first. D2 diagrams, Mermaid diagrams, and math (KaTeX) are the first core plugins.
 
 The dividing line: a feature is core when it is first-party, works offline, and is useful to most users. It belongs in this marketplace as a community plugin when it is a per-user variant (a spell-check language, a website theme) or depends on a third-party network service. Core plugin ids use the `glyph.core.` prefix, which the app refuses for installed plugins.
 
