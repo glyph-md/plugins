@@ -129,7 +129,7 @@ export default {
 
 ## Exporter
 
-The host prepares the rendered HTML, asks for a save location, and writes the file; you only turn HTML into contents. Appears in the palette as "Export: Plain HTML…".
+The host prepares the rendered HTML, asks for a save location, and writes the file; you only turn HTML into contents. Appears in the palette as "Export: Plain HTML…" and, from Glyph 0.26, in File > Export.
 
 ```js
 export default {

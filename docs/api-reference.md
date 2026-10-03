@@ -1,4 +1,4 @@
-# API Reference (0.25.0)
+# API Reference (0.26.0)
 
 A plugin default-exports `{ activate(ctx), deactivate? }`. `activate` receives the **plugin context** (`ctx`), the only door to the host. Every `register*` call returns a **disposer** and is also auto-removed on unload, so you rarely call disposers yourself.
 
@@ -24,6 +24,12 @@ ctx.commands.register({
 ```
 
 The command appears in the palette (`Cmd/Ctrl+K`) under **Commands**.
+
+**API 0.26:** add `menu: "view"` to also list it in the native **View** menu (desktop), after the built-in view commands. The menu shows `title` as is.
+
+```ts
+ctx.commands.register({ id: "my.present", title: "Start Slide Show", menu: "view", run: present });
+```
 
 ## `ctx.ui.addStatusBarItem`
 
@@ -68,6 +74,26 @@ ctx.ui.addSettingsPanel({
 });
 ```
 
+## `ctx.ui.openOverlay` (API 0.26)
+
+Show content over the whole app, with the window taken fullscreen: slide shows, focus modes. Same `mount` contract as the panels, plus a `label` that names the overlay for screen readers. Only one overlay is open at a time; opening another closes the first.
+
+```ts
+const close = ctx.ui.openOverlay({
+  id: "my.show",
+  label: "Slide show",
+  mount(el, registerCleanup) {
+    el.textContent = "Slide 1";
+    const handleKey = (e) => { if (e.key === "ArrowRight") next(); };
+    document.addEventListener("keydown", handleKey);
+    registerCleanup(() => document.removeEventListener("keydown", handleKey));
+  },
+});
+```
+
+- Escape always closes the overlay, before your own key handlers see it, so a plugin cannot trap the user. Closing (by Escape, the returned disposer, or unloading the plugin) runs your cleanups and restores the window.
+- The overlay takes keyboard focus while open and hands it back on close.
+
 ## `ctx.ui.addStyles`
 
 Inject a stylesheet after the app's own styles (plugin rules win ties). Removed automatically on unload. This is how custom CSS and theme plugins work.
@@ -87,18 +113,20 @@ ctx.settings.set("size", size + 1);
 
 ## `ctx.exporters`
 
-Contribute an export format. The host runs the shared pipeline (prepares the rendered document, asks for a save location with a derived filename, writes the file); your plugin only turns HTML into file contents (string or `Uint8Array`). It appears in the command palette as "Export: <label>…".
+Contribute an export format. The host runs the shared pipeline (prepares the rendered document, asks for a save location with a derived filename, writes the file); your plugin only turns HTML into file contents (string or `Uint8Array`). It appears in the command palette as "Export: <label>…" and (API 0.26) in the native **File > Export** menu as "<label>…".
 
 ```ts
 ctx.exporters.register({
   id: "my.slides",
   label: "reveal.js slides",
   extension: "html",
-  async build(bodyHtml) {
-    return `<!doctype html><html>…${bodyHtml}…</html>`;
+  async build(bodyHtml, { title, css, dark }) {
+    return `<!doctype html><html${dark ? ' class="dark"' : ""}><head><title>${title}</title><style>${css}</style></head><body><div class="markdown-body">${bodyHtml}</div></body></html>`;
   },
 });
 ```
+
+**API 0.26:** `build` receives a second argument with what a standalone file needs to look like the app: `title` (from the frontmatter title, the first `# heading`, or the file name; escape it before putting it in markup), `css` (every style rule the app applies, so `.markdown-body` content, highlighted code, math, and alerts render as in the app), and `dark` (whether the app is in its dark theme; the app's dark colors apply under `html.dark`). Older hosts pass only `bodyHtml`.
 
 ### `ctx.exporters.registerSiteTheme` (API 0.17)
 
@@ -171,7 +199,18 @@ ctx.documents.registerFileType({ extensions: ["puml"], language: "plantuml" });
 - Extensions are matched without the dot and ignoring case; the first registration for an extension wins. The language is letters, digits, `-`, and `_` (what the ` ```<language> ` lookup matches) and extensions letters and digits; types Glyph opens itself (markdown, notebooks, canvases, images, media) are refused.
 - The file is fenced at render time, so enabling or disabling your plugin re-renders an open tab in place; with no plugin claiming it, the file shows as plain source. Restoring a saved session waits up to five seconds for plugins, so a restored tab of your type opens once you have registered it.
 - Available in the sandbox (it is pure data), though a sandboxed plugin cannot register the fenced renderer itself.
-- Registered extensions are offered by **Open File**. The workspace file tree, relative links, drag and drop, and the operating system's "open with" still cover only the document types built into Glyph.
+- Registered extensions are offered by **Open File**.
+
+### `ctx.documents.getRenderedHtml` (API 0.26)
+
+The active document's rendered HTML, exactly as exporters receive it in `build` (app-only buttons stripped, images inlined), once diagrams and math have finished rendering. Resolves to `null` when nothing is rendered.
+
+```ts
+const html = await ctx.documents.getRenderedHtml();
+if (html === null) ctx.notify("Open a document first.");
+```
+
+Not available in the sandbox: a sandboxed plugin sees document content only through an export the user runs, so it cannot read whatever is open at will. The workspace file tree, relative links, drag and drop, and the operating system's "open with" still cover only the document types built into Glyph.
 
 ## `ctx.workspace`
 
@@ -261,7 +300,8 @@ Inside the sandbox:
 - `fetch` works only for hosts covered by your `network:<host>` permissions (the exact host or a subdomain of it). `XMLHttpRequest`, `WebSocket`, and `importScripts` are removed.
 - The available API subset is: `ctx.commands`, `ctx.ui.addStyles`, `ctx.exporters`, `ctx.documents`, `ctx.workspace` (still requires `workspace:read`), `ctx.assets`, `ctx.spellcheck`, `ctx.settings`, `ctx.notify`, and `ctx.registerTranslations`.
 - Not available: `ctx.i18n`, which needs the app's strings.
-- Not available: `ctx.markdown` and the DOM-mount APIs (`addStatusBarItem`, `addSidebarPanel`, `addSettingsPanel`), because they cannot cross the worker boundary.
+- Not available: `ctx.markdown` and the DOM-mount APIs (`addStatusBarItem`, `addSidebarPanel`, `addSettingsPanel`, `openOverlay`), because they cannot cross the worker boundary.
+- Not available: `ctx.documents.getRenderedHtml`, so a sandboxed plugin reads document content only from an export the user runs.
 
 Prefer the sandbox (the default) when your plugin needs network access or doesn't touch the UI; users can trust it with less.
 
