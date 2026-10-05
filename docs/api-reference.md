@@ -67,7 +67,7 @@ ctx.ui.addSidebarPanel({
 });
 ```
 
-- `frame.min` is the smallest height the divider allows (default 56). `frame.naturalMax` caps how far the block grows on its own before it scrolls; once the user drags the divider, their height wins.
+- `frame.min` is the smallest height the divider allows (default 56). `frame.naturalMax` caps how far the block grows on its own before it scrolls; once the user drags the divider, their height wins. Both must be finite and not negative, or `addSidebarPanel` throws.
 - `mountHeading` fills the rest of the heading row after the title: a count, a small button. It follows the same `mount` contract and stays visible while the block is collapsed.
 - A collapsed block keeps your body mounted but hidden, so your state survives. The block element around both of your mounts carries `data-collapsed` (it is an ancestor, not the `el` you are handed), which lets your stylesheet hide heading controls that act on the body: `[data-collapsed] .my-sort { display: none }`.
 - `title` is read when the panel is added. To follow a language switch, dispose the panel and add it again from `ctx.i18n.onLanguageChange`; the saved height and collapsed state are keyed by your plugin and panel id, so they carry over.
@@ -80,7 +80,7 @@ List a set of workspace files in place of the file tree, under a heading of your
 ```ts
 const remove = ctx.ui.filterFileTree({
   label: "#project (3)",
-  paths,                       // absolute paths, in the order to list them
+  paths,                       // workspace files, in the order to list them
   onClear: () => remove(),     // the user pressed the list's clear button
 });
 ```
@@ -88,6 +88,7 @@ const remove = ctx.ui.filterFileTree({
 - One filter shows at a time: the newest. Disposing it brings back the one before it, or the tree.
 - The host draws the list (paths relative to the workspace root, the open document highlighted) and opens the file a user clicks. The clear button only calls `onClear`; removing the filter is up to you, so your own state stays the source of truth.
 - `label` must be a string, `paths` an array of strings, and `onClear` a function; anything else throws. The host keeps its own copy of `paths`, so register again to change them.
+- Each path is absolute (as `ctx.vault` returns them) or relative to the workspace root, the same as `ctx.navigation.openFile` takes. A path outside the workspace throws, as does a call with no workspace open: the list only ever shows workspace files.
 - A filter belongs to the workspace it was built for. Dispose it from `ctx.workspace.onChange`, and rebuild it from `ctx.vault.onChange` if its paths can go stale.
 - Not available in the sandbox.
 
