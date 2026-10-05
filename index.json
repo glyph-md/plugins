@@ -34,6 +34,26 @@
       "sandbox": false,
       "packageUrl": "https://github.com/glyph-md/plugins/releases/download/com.glyph.hello-status-v1.1.0/com.glyph.hello-status.zip",
       "sha256": "148af39e4b7d4404bda7f95be495714e341b5c6b0fda3f124cd1df0bf52ee806"
+    },
+    {
+      "id": "com.glyph.slides",
+      "name": "Slides",
+      "description": "Present a document as slides, or export it as a reveal.js deck. Horizontal rules separate slides.",
+      "version": "1.0.0",
+      "apiVersion": "0.26.0",
+      "category": "exporters",
+      "keywords": [
+        "slides",
+        "presentation",
+        "slideshow",
+        "deck",
+        "reveal.js",
+        "export"
+      ],
+      "official": true,
+      "sandbox": false,
+      "packageUrl": "https://github.com/glyph-md/plugins/releases/download/com.glyph.slides-v1.0.0/com.glyph.slides.zip",
+      "sha256": "0000000000000000000000000000000000000000000000000000000000000000"
     }
   ]
 }
