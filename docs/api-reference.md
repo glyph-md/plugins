@@ -69,7 +69,7 @@ ctx.ui.addSidebarPanel({
 
 - `frame.min` is the smallest height the divider allows (default 56). `frame.naturalMax` caps how far the block grows on its own before it scrolls; once the user drags the divider, their height wins.
 - `mountHeading` fills the rest of the heading row after the title: a count, a small button. It follows the same `mount` contract and stays visible while the block is collapsed.
-- A collapsed block keeps your body mounted but hidden, so your state survives. Its element carries `data-collapsed`, which lets your stylesheet hide heading controls that act on the body: `[data-collapsed] .my-sort { display: none }`.
+- A collapsed block keeps your body mounted but hidden, so your state survives. The block element around both of your mounts carries `data-collapsed` (it is an ancestor, not the `el` you are handed), which lets your stylesheet hide heading controls that act on the body: `[data-collapsed] .my-sort { display: none }`.
 - `title` is read when the panel is added. To follow a language switch, dispose the panel and add it again from `ctx.i18n.onLanguageChange`; the saved height and collapsed state are keyed by your plugin and panel id, so they carry over.
 - The tags and backlinks core plugins are built this way.
 
@@ -87,6 +87,7 @@ const remove = ctx.ui.filterFileTree({
 
 - One filter shows at a time: the newest. Disposing it brings back the one before it, or the tree.
 - The host draws the list (paths relative to the workspace root, the open document highlighted) and opens the file a user clicks. The clear button only calls `onClear`; removing the filter is up to you, so your own state stays the source of truth.
+- `label` must be a string, `paths` an array of strings, and `onClear` a function; anything else throws. The host keeps its own copy of `paths`, so register again to change them.
 - A filter belongs to the workspace it was built for. Dispose it from `ctx.workspace.onChange`, and rebuild it from `ctx.vault.onChange` if its paths can go stale.
 - Not available in the sandbox.
 
@@ -222,7 +223,8 @@ const active = ctx.documents.getActive();
 ctx.documents.onActiveChange(() => refresh());   // returns a disposer; removed on unload too
 ```
 
-- `path` is absolute. `text` includes unsaved edits; it is `null` while the document is still loading and for documents with no text (an image), and `""` for an empty one. `selection` is the text selected in the window when you ask.
+- `path` is absolute, except for a new document not saved yet, which reports its placeholder name. `text` includes unsaved edits; it is `null` while the document is still loading and for documents with no text (an image), and `""` for an empty one. `selection` is the text selected in the window, read when you access it.
+- It needs no permission, and it also reports a loose file opened from outside the workspace: a plugin in the app context can read the window anyway.
 - `onActiveChange` fires when another document becomes active, or none. Typing in the active document does not fire it; call `getActive()` when you need the current text.
 - Not available in the sandbox: a sandboxed plugin sees document content only through an export the user runs.
 
@@ -246,6 +248,7 @@ const { nodes, edges } = await ctx.vault.graph();        // notes and the resolv
 const links = await ctx.vault.backlinks(notePath);        // [{ source, line, snippet }]
 const tags  = await ctx.vault.tags();                     // [{ tag, count }]
 const files = await ctx.vault.pathsWithTag("project");    // files with the tag or one nested under it
+const { truncated } = await ctx.vault.status();           // true when the workspace was too large to index whole
 
 ctx.vault.onChange(() => refresh());   // returns a disposer; removed on unload too
 ```
@@ -254,6 +257,8 @@ ctx.vault.onChange(() => refresh());   // returns a disposer; removed on unload 
 - A backlink's `line` is the 1-based source line of the link and `snippet` that line's text. Hand `source` and `line` to `ctx.navigation.openFile` to jump there.
 - Tag counts include nested tags: `project` counts the files tagged `project/glyph` too, and `pathsWithTag("project")` lists them.
 - `onChange` fires after the index changes: a saved edit, a rename, a file added or removed, another workspace. Answers are a snapshot, so ask again from the listener. A slower answer can arrive after a newer one; keep a request counter and drop the stale ones.
+- Answers are yours to keep and change: the graph and tag lists are copies, not the objects the app draws from.
+- A very large workspace is indexed only in part. `status()` says so; when `truncated` is true, every other answer covers only what was indexed, so say that in whatever you draw from it.
 - Not available in the sandbox.
 
 ## `ctx.navigation` (API 0.26)
@@ -263,7 +268,9 @@ ctx.navigation.openFile("/vault/Notes/Plan.md");
 ctx.navigation.openFile("Notes/Plan.md", { line: 12 });
 ```
 
-Opens a workspace file in a tab, or switches to its tab when it is already open. `path` is absolute (as `ctx.vault` and `ctx.workspace.listFiles` return them) or relative to the workspace root; a path outside the workspace throws, as does a call with no workspace open. `line` is a 1-based source line: once the document has rendered, the viewer scrolls to the block covering it and flashes it. Not available in the sandbox.
+Opens a workspace file in a tab, or switches to its tab when it is already open. `path` is absolute (as `ctx.vault` and `ctx.workspace.listFiles` return them) or relative to the workspace root; a path outside the workspace throws, as does a call with no workspace open. It needs no permission. Not available in the sandbox.
+
+`line` is a 1-based source line: once the note's tab is open and rendered, the viewer scrolls to the block covering it and flashes it. It has no effect when the note is already open in another window (that window is raised instead) or when the tab shows no rendered view of the line (the editor alone, or a split view with scroll sync off).
 
 ## `ctx.assets`
 
