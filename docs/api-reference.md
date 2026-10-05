@@ -25,7 +25,7 @@ ctx.commands.register({
 
 The command appears in the palette (`Cmd/Ctrl+K`) under **Commands**.
 
-**API 0.26:** add `menu: "view"` to also list it in the native **View** menu (desktop), after the built-in view commands. The menu shows `title` as is and finds the command again by its `id`, so keep ids unique. A title over 100 characters, or one with tabs or other control characters, stays in the palette but is not listed in the menu.
+**API 0.26:** add `menu: "view"` to also list it in the native **View** menu (desktop), after the built-in view commands. The menu shows `title` as is and finds the command again by your plugin's id plus the command `id`, so ids need only be unique within your plugin. A title over 100 characters, or one with tabs or other control characters, stays in the palette but is not listed in the menu.
 
 ```ts
 ctx.commands.register({ id: "my.present", title: "Start Slide Show", menu: "view", run: present });
@@ -91,7 +91,7 @@ const close = ctx.ui.openOverlay({
 });
 ```
 
-- The way out belongs to the host, so a plugin cannot trap the user: Escape always closes the overlay, before your own key handlers see it, and the host draws a small close button in the top corner (top right in left-to-right layouts). Closing (by either, by the returned disposer, or by unloading the plugin) runs your cleanups and restores the window.
+- The host keeps its own ways out, so a bug in your overlay does not strand the user in a fullscreen layer: Escape closes the overlay before your own key handlers see it, and the host draws a small close button in the top corner (top right in left-to-right layouts). Leave both alone; do not cover the button or handle Escape yourself. Closing (by either, by the returned disposer, or by unloading the plugin) runs your cleanups and restores the window.
 - The overlay takes keyboard focus before `mount` runs; focus something of your own in `mount` if you need to. Focus returns to where it was on close.
 - If `mount` throws, the overlay closes instead of leaving an empty screen.
 
@@ -114,7 +114,7 @@ ctx.settings.set("size", size + 1);
 
 ## `ctx.exporters`
 
-Contribute an export format. The host runs the shared pipeline (prepares the rendered document, asks for a save location with a derived filename, writes the file); your plugin only turns HTML into file contents (string or `Uint8Array`). It appears in the command palette as "Export: <label>…" and (API 0.26) in the native **File > Export** menu as "<label>…", under the built-in formats. The menu finds the exporter again by its `id`, and skips a label over 99 characters or with control characters.
+Contribute an export format. The host runs the shared pipeline (prepares the rendered document, asks for a save location with a derived filename, writes the file); your plugin only turns HTML into file contents (string or `Uint8Array`). It appears in the command palette as "Export: <label>…" and (API 0.26) in the native **File > Export** menu as "<label>…", under the built-in formats. The menu finds the exporter again by your plugin's id plus the exporter `id`, and skips a label over 99 characters or with control characters.
 
 ```ts
 ctx.exporters.register({
