@@ -1,4 +1,4 @@
-# API Reference (0.25.0)
+# API Reference (0.26.0)
 
 A plugin default-exports `{ activate(ctx), deactivate? }`. `activate` receives the **plugin context** (`ctx`), the only door to the host. Every `register*` call returns a **disposer** and is also auto-removed on unload, so you rarely call disposers yourself.
 
@@ -51,6 +51,46 @@ ctx.ui.addSidebarPanel({
   mount(el) { el.textContent = "3 open"; },
 });
 ```
+
+### Files panel blocks (API 0.26)
+
+`location: "files"` puts the panel in the Files panel instead, below the file tree, as a block. The host draws the heading the user collapses it with and the divider that resizes it, and remembers both; you fill the body. Unlike a panel below the Outline, a block shows whether or not the open note has headings (it needs an open workspace, since the Files panel does).
+
+```ts
+ctx.ui.addSidebarPanel({
+  id: "my.links",
+  title: "Links",
+  location: "files",
+  frame: { min: 80, naturalMax: 160 },   // optional height bounds, in pixels
+  mountHeading(el) { el.textContent = "3"; },   // optional: what follows the title
+  mount(el) { el.textContent = "three links"; },
+});
+```
+
+- `frame.min` is the smallest height the divider allows (default 56). `frame.naturalMax` caps how far the block grows on its own before it scrolls; once the user drags the divider, their height wins. Both must be finite and not negative, or `addSidebarPanel` throws.
+- `mountHeading` fills the rest of the heading row after the title: a count, a small button. It follows the same `mount` contract and stays visible while the block is collapsed.
+- A collapsed block keeps your body mounted but hidden, so your state survives. The block element around both of your mounts carries `data-collapsed` (it is an ancestor, not the `el` you are handed), which lets your stylesheet hide heading controls that act on the body: `[data-collapsed] .my-sort { display: none }`.
+- `title` is read when the panel is added. To follow a language switch, dispose the panel and add it again from `ctx.i18n.onLanguageChange`; the saved height and collapsed state are keyed by your plugin and panel id, so they carry over.
+- The tags and backlinks core plugins are built this way.
+
+## `ctx.ui.filterFileTree` (API 0.26)
+
+List a set of workspace files in place of the file tree, under a heading of your own, until you dispose it. This is what the tags core plugin does when a tag is picked.
+
+```ts
+const remove = ctx.ui.filterFileTree({
+  label: "#project (3)",
+  paths,                       // workspace files, in the order to list them
+  onClear: () => remove(),     // the user pressed the list's clear button
+});
+```
+
+- One filter shows at a time: the newest. Disposing it brings back the one before it, or the tree.
+- The host draws the list (paths relative to the workspace root, the open document highlighted) and opens the file a user clicks. The clear button only calls `onClear`; removing the filter is up to you, so your own state stays the source of truth.
+- `label` must be a string, `paths` an array of strings, and `onClear` a function; anything else throws. The host keeps its own copy of `paths`, so register again to change them.
+- Each path is absolute (as `ctx.vault` returns them) or relative to the workspace root, the same as `ctx.navigation.openFile` takes. A path outside the workspace throws, as does a call with no workspace open: the list only ever shows workspace files.
+- A filter belongs to the workspace it was built for. Dispose it from `ctx.workspace.onChange`, and rebuild it from `ctx.vault.onChange` if its paths can go stale.
+- Not available in the sandbox.
 
 ## `ctx.ui.addSettingsPanel`
 
@@ -173,6 +213,22 @@ ctx.documents.registerFileType({ extensions: ["puml"], language: "plantuml" });
 - Available in the sandbox (it is pure data), though a sandboxed plugin cannot register the fenced renderer itself.
 - Registered extensions are offered by **Open File**. The workspace file tree, relative links, drag and drop, and the operating system's "open with" still cover only the document types built into Glyph.
 
+### `ctx.documents.getActive` (API 0.26)
+
+The document in the active tab, or `null` when no document tab is active.
+
+```ts
+const active = ctx.documents.getActive();
+// { path: "/vault/Notes/Plan.md", text: "# Plan\n...", selection: "" }
+
+ctx.documents.onActiveChange(() => refresh());   // returns a disposer; removed on unload too
+```
+
+- `path` is absolute, except for a new document not saved yet, which reports its placeholder name. `text` includes unsaved edits; it is `null` while the document is still loading and for documents with no text (an image), and `""` for an empty one. `selection` is the text selected in the window, read when you access it.
+- It needs no permission, and it also reports a loose file opened from outside the workspace: a plugin in the app context can read the window anyway.
+- `onActiveChange` fires when another document becomes active, or none. Typing in the active document does not fire it; call `getActive()` when you need the current text.
+- Not available in the sandbox: a sandboxed plugin sees document content only through an export the user runs.
+
 ## `ctx.workspace`
 
 Read-only, mediated access to the opened workspace. Requires the plugin manifest to declare the `workspace:read` permission (shown to the user in the install consent prompt). Paths are workspace-relative; anything absolute or escaping the root is rejected, and calls fail when no workspace is open.
@@ -181,6 +237,41 @@ Read-only, mediated access to the opened workspace. Requires the plugin manifest
 const files = await ctx.workspace.listFiles();      // absolute paths of workspace markdown files
 const text  = await ctx.workspace.readFile("sub/notes.md");
 ```
+
+**API 0.26:** `ctx.workspace.getRoot()` returns the absolute path of the opened workspace, or `null` when none is open, and `ctx.workspace.onChange(listener)` runs when the workspace opens, closes, or changes. Both need `workspace:read`, and neither is available in the sandbox.
+
+## `ctx.vault` (API 0.26)
+
+Read-only queries over the workspace index: the same index behind the graph, backlinks, and tags. Requires the `workspace:read` permission. Paths are absolute, and every query rejects when no workspace is open.
+
+```ts
+const { nodes, edges } = await ctx.vault.graph();        // notes and the resolved links between them
+const links = await ctx.vault.backlinks(notePath);        // [{ source, line, snippet }]
+const tags  = await ctx.vault.tags();                     // [{ tag, count }]
+const files = await ctx.vault.pathsWithTag("project");    // files with the tag or one nested under it
+const { truncated } = await ctx.vault.status();           // true when the workspace was too large to index whole
+
+ctx.vault.onChange(() => refresh());   // returns a disposer; removed on unload too
+```
+
+- A graph node is `{ id, label, degree, orphan }`, where `id` is the note's path; an edge is `{ source, target }` of node ids.
+- A backlink's `line` is the 1-based source line of the link and `snippet` that line's text. Hand `source` and `line` to `ctx.navigation.openFile` to jump there.
+- Tag counts include nested tags: `project` counts the files tagged `project/glyph` too, and `pathsWithTag("project")` lists them.
+- `onChange` fires after the index changes: a saved edit, a rename, a file added or removed, another workspace. Answers are a snapshot, so ask again from the listener. A slower answer can arrive after a newer one; keep a request counter and drop the stale ones.
+- Answers are yours to keep and change: the graph and tag lists are copies, not the objects the app draws from.
+- A very large workspace is indexed only in part. `status()` says so; when `truncated` is true, every other answer covers only what was indexed, so say that in whatever you draw from it.
+- Not available in the sandbox.
+
+## `ctx.navigation` (API 0.26)
+
+```ts
+ctx.navigation.openFile("/vault/Notes/Plan.md");
+ctx.navigation.openFile("Notes/Plan.md", { line: 12 });
+```
+
+Opens a workspace file in a tab, or switches to its tab when it is already open. `path` is absolute (as `ctx.vault` and `ctx.workspace.listFiles` return them) or relative to the workspace root; a path outside the workspace throws, as does a call with no workspace open. It needs no permission. Not available in the sandbox.
+
+`line` is a 1-based source line: once the note's tab is open and rendered, the viewer scrolls to the block covering it and flashes it. It has no effect when the note is already open in another window (that window is raised instead) or when the tab shows no rendered view of the line (the editor alone, or a split view with scroll sync off).
 
 ## `ctx.assets`
 
@@ -262,6 +353,7 @@ Inside the sandbox:
 - The available API subset is: `ctx.commands`, `ctx.ui.addStyles`, `ctx.exporters`, `ctx.documents`, `ctx.workspace` (still requires `workspace:read`), `ctx.assets`, `ctx.spellcheck`, `ctx.settings`, `ctx.notify`, and `ctx.registerTranslations`.
 - Not available: `ctx.i18n`, which needs the app's strings.
 - Not available: `ctx.markdown` and the DOM-mount APIs (`addStatusBarItem`, `addSidebarPanel`, `addSettingsPanel`), because they cannot cross the worker boundary.
+- Not available: the app state APIs (`ctx.ui.filterFileTree`, `ctx.documents.getActive` and `onActiveChange`, `ctx.workspace.getRoot` and `onChange`, `ctx.vault`, `ctx.navigation`). Calling one throws an error that names it.
 
 Prefer the sandbox (the default) when your plugin needs network access or doesn't touch the UI; users can trust it with less.
 
