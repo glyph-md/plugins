@@ -1,3 +1,24 @@
 {
-  "plugins": []
+  "plugins": [
+    {
+      "id": "com.glyph.slides",
+      "name": "Slides",
+      "description": "Present a document as slides, or export it as a reveal.js deck. Horizontal rules separate slides.",
+      "version": "1.0.0",
+      "apiVersion": "0.26.0",
+      "category": "exporters",
+      "keywords": [
+        "slides",
+        "presentation",
+        "slideshow",
+        "deck",
+        "reveal.js",
+        "export"
+      ],
+      "official": true,
+      "sandbox": false,
+      "packageUrl": "https://github.com/glyph-md/plugins/releases/download/com.glyph.slides-v1.0.0/com.glyph.slides.zip",
+      "sha256": "0000000000000000000000000000000000000000000000000000000000000000"
+    }
+  ]
 }
