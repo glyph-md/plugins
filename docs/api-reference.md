@@ -25,11 +25,23 @@ ctx.commands.register({
 
 The command appears in the palette (`Cmd/Ctrl+K`) under **Commands**.
 
-**API 0.26:** add `menu: "view"` to also list it in the native **View** menu (desktop), after the built-in view commands. The menu shows `title` as is and finds the command again by your plugin's id plus the command `id`, so ids need only be unique within your plugin. A title over 100 characters, or one with tabs or other control characters, stays in the palette but is not listed in the menu.
+### Shortcut, condition, and menu (API 0.26)
 
 ```ts
-ctx.commands.register({ id: "my.present", title: "Start Slide Show", menu: "view", run: present });
+ctx.commands.register({
+  id: "notes.today",
+  title: "Open Today's Note",
+  shortcut: "CmdOrCtrl+Shift+T",   // the default; the user can rebind it
+  when: "workspace",               // offered only while a folder workspace is open
+  menu: "file",                    // also listed in the native File menu ("view" for View)
+  run: openTodaysNote,
+});
 ```
+
+- `shortcut` is an accelerator: any of `CmdOrCtrl`, `Alt`, and `Shift`, then one key, joined with `+`. It must hold `CmdOrCtrl` or `Alt`, so it never fires on ordinary typing, and it cannot be a chord text editing needs: `CmdOrCtrl` with `A`, `C`, `V`, `X`, `Y`, `Z`, or `Shift+Z`. `Ctrl` and `Cmd` are read as `CmdOrCtrl`. It is listed under **Plugins** in Settings, Hotkeys, where the user can rebind it and where a clash with another shortcut is flagged. A shortcut the app does not take is dropped; the command itself stays.
+- `when: "workspace"` hides the command from the palette, disables its menu item, and mutes its shortcut while no folder workspace is open.
+- `menu` lists the command in the desktop app's native File or View menu, with its shortcut beside it. The menu shows `title` as is and finds the command again by your plugin's id plus the command `id`, so ids need only be unique within your plugin. A title over 100 characters, or one with tabs or other control characters, stays in the palette but is not listed in the menu.
+- All three work in the sandbox.
 
 ## `ctx.ui.addStatusBarItem`
 
@@ -114,6 +126,28 @@ ctx.ui.addSettingsPanel({
 });
 ```
 
+## `ctx.ui.addWorkspaceSettingsPanel` (API 0.26)
+
+Adds a tab to Workspace Settings (File, Workspace Settings…) for what your plugin keeps per workspace. Pair it with `ctx.workspace.getSettings` and `setSettings`.
+
+```ts
+ctx.ui.addWorkspaceSettingsPanel({
+  id: "my.workspace-settings",
+  title: "My Plugin",
+  mount(el) {
+    const input = document.createElement("input");
+    ctx.workspace.getSettings().then((saved) => {
+      input.value = typeof saved.folder === "string" ? saved.folder : "notes";
+    });
+    input.onchange = () => ctx.workspace.setSettings({ folder: input.value });
+    el.append("Folder: ", input);
+  },
+});
+```
+
+- The tab is there while your plugin is enabled, after the built-in ones. Workspace Settings only opens with a folder workspace open, so the panel can count on one.
+- Not available in the sandbox.
+
 ## `ctx.ui.openOverlay` (API 0.26)
 
 Show content over the whole app, with the window taken fullscreen: slide shows, focus modes. Same `mount` contract as the panels, plus a `label` that names the overlay for screen readers. Only one overlay is open at a time; opening another closes the first.
@@ -134,6 +168,7 @@ const close = ctx.ui.openOverlay({
 - The host keeps its own ways out, so a bug in your overlay does not strand the user in a fullscreen layer: Escape closes the overlay before your own key handlers see it, and the host draws a small close button in the top corner (top right in left-to-right layouts). Leave both alone; do not cover the button or handle Escape yourself. Closing (by either, by the returned disposer, or by unloading the plugin) runs your cleanups and restores the window.
 - The overlay takes keyboard focus before `mount` runs; focus something of your own in `mount` if you need to. Focus returns to where it was on close.
 - If `mount` throws, the overlay closes instead of leaving an empty screen.
+- Not available in the sandbox.
 
 ## `ctx.ui.addStyles`
 
@@ -271,7 +306,7 @@ ctx.documents.onActiveChange(() => refresh());   // returns a disposer; removed 
 
 ## `ctx.workspace`
 
-Read-only, mediated access to the opened workspace. Requires the plugin manifest to declare the `workspace:read` permission (shown to the user in the install consent prompt). Paths are workspace-relative; anything absolute or escaping the root is rejected, and calls fail when no workspace is open.
+Mediated access to the opened workspace. Reading requires the plugin manifest to declare the `workspace:read` permission, and writing `workspace:write` (both are shown to the user in the install consent prompt). Paths are workspace-relative; anything absolute or escaping the root is rejected, and calls fail when no workspace is open.
 
 ```ts
 const files = await ctx.workspace.listFiles();      // absolute paths of workspace markdown files
@@ -279,6 +314,22 @@ const text  = await ctx.workspace.readFile("sub/notes.md");
 ```
 
 **API 0.26:** `ctx.workspace.getRoot()` returns the absolute path of the opened workspace, or `null` when none is open, and `ctx.workspace.onChange(listener)` runs when the workspace opens, closes, or changes. Both need `workspace:read`, and neither is available in the sandbox.
+
+### Creating files and keeping settings (API 0.26)
+
+```ts
+const note = await ctx.workspace.createFile("daily/2026-10-08.md", "# Today\n");
+// { path: "/vault/daily/2026-10-08.md", created: true }
+
+const saved = await ctx.workspace.getSettings();      // {} until you save some
+await ctx.workspace.setSettings({ folder: "journal" });
+```
+
+- `createFile` creates the file and any folders it needs, and never replaces a file: one that is already there is left as it is, and the call resolves with `created: false`. The `path` it reports is absolute and spelled as it is on disk, ready for `ctx.navigation.openFile`. Needs `workspace:write`.
+- It refuses a hidden file or folder (a name starting with a dot), which keeps `.git` and `.glyph` out of reach, and anything outside the workspace.
+- `getSettings` and `setSettings` hold one JSON object per plugin for the opened workspace, in the workspace's `.glyph/config.json`. It travels with the folder and its sync, and it can be edited by hand, so check what you read. `setSettings` replaces the whole object and takes at most 64 KiB. `getSettings` needs `workspace:read` and `setSettings` needs `workspace:write`. Both reject when the workspace's `.glyph` folder or its `config.json` is a symbolic link.
+- Keep what belongs to the user rather than to one workspace in `ctx.settings`.
+- None of the three is available in the sandbox.
 
 ## `ctx.vault` (API 0.26)
 
@@ -392,9 +443,9 @@ Inside the sandbox:
 - `fetch` works only for hosts covered by your `network:<host>` permissions (the exact host or a subdomain of it). `XMLHttpRequest`, `WebSocket`, and `importScripts` are removed.
 - The available API subset is: `ctx.commands`, `ctx.ui.addStyles`, `ctx.exporters`, `ctx.documents`, `ctx.workspace` (still requires `workspace:read`), `ctx.assets`, `ctx.spellcheck`, `ctx.settings`, `ctx.notify`, and `ctx.registerTranslations`.
 - Not available: `ctx.i18n`, which needs the app's strings.
-- Not available: `ctx.markdown` and the DOM-mount APIs (`addStatusBarItem`, `addSidebarPanel`, `addSettingsPanel`, `openOverlay`), because they cannot cross the worker boundary.
+- Not available: `ctx.markdown` and the DOM-mount APIs (`addStatusBarItem`, `addSidebarPanel`, `addSettingsPanel`, `addWorkspaceSettingsPanel`, `openOverlay`), because they cannot cross the worker boundary.
 - Not available: `ctx.documents.getRenderedHtml`, so a sandboxed plugin reads document content only from an export the user runs.
-- Not available: the app state APIs (`ctx.ui.filterFileTree`, `ctx.documents.getActive` and `onActiveChange`, `ctx.workspace.getRoot` and `onChange`, `ctx.vault`, `ctx.navigation`). Calling one throws an error that names it.
+- Not available: the app state APIs (`ctx.ui.filterFileTree`, `ctx.documents.getActive` and `onActiveChange`, `ctx.workspace.getRoot` and `onChange`, `ctx.vault`, `ctx.navigation`) and workspace writes and settings (`ctx.workspace.createFile`, `getSettings`, and `setSettings`). Calling one throws an error that names it.
 
 Prefer the sandbox (the default) when your plugin needs network access or doesn't touch the UI; users can trust it with less.
 

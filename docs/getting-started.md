@@ -70,5 +70,5 @@ Use **Manage Plugins…** to enable/disable or remove it. To ship it to other us
 | `description` | no | One-line summary |
 | `main` | no | Entry file name, defaults to `main.js` |
 | `files` | no | Every file the plugin consists of (must include `main`), e.g. `["main.js", "assets/fa.dic"]`. Required to ship assets: installs copy exactly this list and `ctx.assets` reads are limited to it |
-| `permissions` | no | Capabilities you request (e.g. `workspace:read`, `network:api.example.com`); shown to users for consent |
+| `permissions` | no | Capabilities you request (e.g. `workspace:read`, `workspace:write`, `network:api.example.com`); shown to users for consent |
 | `sandbox` | no | Defaults to `true`: an isolated worker with network fenced to your `network:` permissions. Declare `false` only if you need main-context APIs (markdown, DOM mounts); users must then accept a full-access warning. See the [API reference](api-reference.md#sandboxed-plugins) |
