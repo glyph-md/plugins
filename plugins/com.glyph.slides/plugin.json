@@ -6,9 +6,16 @@
   "version": "1.0.0",
   "apiVersion": "0.26.0",
   "category": "exporters",
-  "keywords": ["slides", "presentation", "slideshow", "deck", "reveal.js", "export"],
+  "keywords": [
+    "slides",
+    "presentation",
+    "slideshow",
+    "deck",
+    "reveal.js",
+    "export"
+  ],
   "official": true,
   "sandbox": false,
   "packageUrl": "https://github.com/glyph-md/plugins/releases/download/com.glyph.slides-v1.0.0/com.glyph.slides.zip",
-  "sha256": "0000000000000000000000000000000000000000000000000000000000000000"
+  "sha256": "bf57d7d9ac88cd454cad8ba4c2ba9686d327d13901a7540e57e7aaf4e0005026"
 }
