@@ -40,7 +40,7 @@ ctx.commands.register({
 
 - `shortcut` is an accelerator: any of `CmdOrCtrl`, `Alt`, and `Shift`, then one key, joined with `+`. It must hold `CmdOrCtrl` or `Alt`, so it never fires on ordinary typing, and it cannot be a chord text editing needs: `CmdOrCtrl` with `A`, `C`, `V`, `X`, `Y`, `Z`, or `Shift+Z`. `Ctrl` and `Cmd` are read as `CmdOrCtrl`. It is listed under **Plugins** in Settings, Hotkeys, where the user can rebind it and where a clash with another shortcut is flagged. A shortcut the app does not take is dropped; the command itself stays.
 - `when: "workspace"` hides the command from the palette, disables its menu item, and mutes its shortcut while no folder workspace is open.
-- `menu` lists the command in the desktop app's native File or View menu, with its shortcut beside it.
+- `menu` lists the command in the desktop app's native File or View menu, with its shortcut beside it. The menu shows `title` as is and finds the command again by your plugin's id plus the command `id`, so ids need only be unique within your plugin. A title over 100 characters, or one with tabs or other control characters, stays in the palette but is not listed in the menu.
 - All three work in the sandbox.
 
 ## `ctx.ui.addStatusBarItem`
@@ -148,6 +148,28 @@ ctx.ui.addWorkspaceSettingsPanel({
 - The tab is there while your plugin is enabled, after the built-in ones. Workspace Settings only opens with a folder workspace open, so the panel can count on one.
 - Not available in the sandbox.
 
+## `ctx.ui.openOverlay` (API 0.26)
+
+Show content over the whole app, with the window taken fullscreen: slide shows, focus modes. Same `mount` contract as the panels, plus a `label` that names the overlay for screen readers. Only one overlay is open at a time; opening another closes the first.
+
+```ts
+const close = ctx.ui.openOverlay({
+  id: "my.show",
+  label: "Slide show",
+  mount(el, registerCleanup) {
+    el.textContent = "Slide 1";
+    const handleKey = (e) => { if (e.key === "ArrowRight") next(); };
+    document.addEventListener("keydown", handleKey);
+    registerCleanup(() => document.removeEventListener("keydown", handleKey));
+  },
+});
+```
+
+- The host keeps its own ways out, so a bug in your overlay does not strand the user in a fullscreen layer: Escape closes the overlay before your own key handlers see it, and the host draws a small close button in the top corner (top right in left-to-right layouts). Leave both alone; do not cover the button or handle Escape yourself. Closing (by either, by the returned disposer, or by unloading the plugin) runs your cleanups and restores the window.
+- The overlay takes keyboard focus before `mount` runs; focus something of your own in `mount` if you need to. Focus returns to where it was on close.
+- If `mount` throws, the overlay closes instead of leaving an empty screen.
+- Not available in the sandbox.
+
 ## `ctx.ui.addStyles`
 
 Inject a stylesheet after the app's own styles (plugin rules win ties). Removed automatically on unload. This is how custom CSS and theme plugins work.
@@ -167,18 +189,20 @@ ctx.settings.set("size", size + 1);
 
 ## `ctx.exporters`
 
-Contribute an export format. The host runs the shared pipeline (prepares the rendered document, asks for a save location with a derived filename, writes the file); your plugin only turns HTML into file contents (string or `Uint8Array`). It appears in the command palette as "Export: <label>…".
+Contribute an export format. The host runs the shared pipeline (prepares the rendered document, asks for a save location with a derived filename, writes the file); your plugin only turns HTML into file contents (string or `Uint8Array`). It appears in the command palette as "Export: <label>…" and (API 0.26) in the native **File > Export** menu as "<label>…", under the built-in formats. The menu finds the exporter again by your plugin's id plus the exporter `id`, and skips a label over 99 characters or with control characters.
 
 ```ts
 ctx.exporters.register({
   id: "my.slides",
   label: "reveal.js slides",
   extension: "html",
-  async build(bodyHtml) {
-    return `<!doctype html><html>…${bodyHtml}…</html>`;
+  async build(bodyHtml, { title, css, dark }) {
+    return `<!doctype html><html${dark ? ' class="dark"' : ""}><head><title>${title}</title><style>${css}</style></head><body><div class="markdown-body">${bodyHtml}</div></body></html>`;
   },
 });
 ```
+
+**API 0.26:** `build` receives a second argument with what a standalone file needs to look like the app: `title` (from the frontmatter title, the first `# heading`, or the file name; escape it before putting it in markup), `css` (every style rule the app applies, so `.markdown-body` content, highlighted code, math, and alerts render as in the app), and `dark` (whether the app is in its dark theme; the app's dark colors apply under `html.dark`). Older hosts pass only `bodyHtml`.
 
 ### `ctx.exporters.registerSiteTheme` (API 0.17)
 
@@ -251,7 +275,18 @@ ctx.documents.registerFileType({ extensions: ["puml"], language: "plantuml" });
 - Extensions are matched without the dot and ignoring case; the first registration for an extension wins. The language is letters, digits, `-`, and `_` (what the ` ```<language> ` lookup matches) and extensions letters and digits; types Glyph opens itself (markdown, notebooks, canvases, images, media) are refused.
 - The file is fenced at render time, so enabling or disabling your plugin re-renders an open tab in place; with no plugin claiming it, the file shows as plain source. Restoring a saved session waits up to five seconds for plugins, so a restored tab of your type opens once you have registered it.
 - Available in the sandbox (it is pure data), though a sandboxed plugin cannot register the fenced renderer itself.
-- Registered extensions are offered by **Open File**. The workspace file tree, relative links, drag and drop, and the operating system's "open with" still cover only the document types built into Glyph.
+- Registered extensions are offered by **Open File**.
+
+### `ctx.documents.getRenderedHtml` (API 0.26)
+
+The active document's rendered HTML, exactly as exporters receive it in `build` (app-only buttons stripped, images inlined), once diagrams and math have finished rendering. Resolves to `null` when no document is rendered: an empty window, a tab showing only the editor, or a canvas.
+
+```ts
+const html = await ctx.documents.getRenderedHtml();
+if (html === null) ctx.notify("Open a document first.");
+```
+
+Not available in the sandbox: a sandboxed plugin sees document content only through an export the user runs, so it cannot read whatever is open at will. The workspace file tree, relative links, drag and drop, and the operating system's "open with" still cover only the document types built into Glyph.
 
 ### `ctx.documents.getActive` (API 0.26)
 
@@ -408,7 +443,8 @@ Inside the sandbox:
 - `fetch` works only for hosts covered by your `network:<host>` permissions (the exact host or a subdomain of it). `XMLHttpRequest`, `WebSocket`, and `importScripts` are removed.
 - The available API subset is: `ctx.commands`, `ctx.ui.addStyles`, `ctx.exporters`, `ctx.documents`, `ctx.workspace` (still requires `workspace:read`), `ctx.assets`, `ctx.spellcheck`, `ctx.settings`, `ctx.notify`, and `ctx.registerTranslations`.
 - Not available: `ctx.i18n`, which needs the app's strings.
-- Not available: `ctx.markdown` and the DOM-mount APIs (`addStatusBarItem`, `addSidebarPanel`, `addSettingsPanel`, `addWorkspaceSettingsPanel`), because they cannot cross the worker boundary.
+- Not available: `ctx.markdown` and the DOM-mount APIs (`addStatusBarItem`, `addSidebarPanel`, `addSettingsPanel`, `addWorkspaceSettingsPanel`, `openOverlay`), because they cannot cross the worker boundary.
+- Not available: `ctx.documents.getRenderedHtml`, so a sandboxed plugin reads document content only from an export the user runs.
 - Not available: the app state APIs (`ctx.ui.filterFileTree`, `ctx.documents.getActive` and `onActiveChange`, `ctx.workspace.getRoot` and `onChange`, `ctx.vault`, `ctx.navigation`) and workspace writes and settings (`ctx.workspace.createFile`, `getSettings`, and `setSettings`). Calling one throws an error that names it.
 
 Prefer the sandbox (the default) when your plugin needs network access or doesn't touch the UI; users can trust it with less.

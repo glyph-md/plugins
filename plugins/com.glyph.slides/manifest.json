@@ -1,0 +1,11 @@
+{
+  "id": "com.glyph.slides",
+  "name": "Slides",
+  "description": "Present a document as slides, or export it as a reveal.js deck. Horizontal rules separate slides.",
+  "version": "1.0.0",
+  "apiVersion": "0.26.0",
+  "main": "main.js",
+  "sandbox": false,
+  "files": ["main.js", "assets/reveal.js", "assets/reveal.css", "LICENSE"],
+  "permissions": []
+}

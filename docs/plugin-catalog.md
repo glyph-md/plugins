@@ -4,6 +4,14 @@
 
 Every published plugin, grouped by category. Each entry links the plugin's own README on GitHub (its catalog page, kept next to its registration in `plugins/<id>/`).
 
+## Exporters
+
+### [Slides](https://github.com/glyph-md/plugins/tree/main/plugins/com.glyph.slides)
+
+`com.glyph.slides` v1.0.0 · official · full trust · no permissions
+
+Present a document as slides, or export it as a reveal.js deck. Horizontal rules separate slides.
+
 ## Language
 
 ### [Persian Dictionary](https://github.com/glyph-md/plugins/tree/main/plugins/com.glyph.dictionary-fa)
