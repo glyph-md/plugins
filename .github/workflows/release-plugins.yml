@@ -23,9 +23,10 @@ jobs:
   release:
     runs-on: ubuntu-24.04
     steps:
-      - uses: actions/checkout@v5
+      - uses: actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803 # v6.1.0
         with:
           fetch-depth: 0
+          persist-credentials: false
 
       - name: Package and release changed official plugins
         env:
@@ -36,6 +37,8 @@ jobs:
         run: node scripts/build-index.mjs
 
       - name: Commit registration and index updates
+        env:
+          GITHUB_TOKEN: ${{ github.token }}
         run: |
           if git diff --quiet; then
             echo "nothing changed"
@@ -46,4 +49,4 @@ jobs:
           git add plugins index.json index docs/plugin-catalog.md
           git commit -m "chore: release official plugin packages and regenerate the index"
           git pull --rebase origin main
-          git push
+          git push "https://x-access-token:${GITHUB_TOKEN}@github.com/${GITHUB_REPOSITORY}.git" HEAD:main

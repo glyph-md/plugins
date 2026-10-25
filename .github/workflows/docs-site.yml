@@ -16,35 +16,47 @@ on:
       - ".github/workflows/docs-site.yml"
   workflow_dispatch:
 
-permissions:
-  contents: read
-  pages: write
-  id-token: write
+permissions: {}
 
 concurrency:
   group: docs-site
   cancel-in-progress: true
 
 jobs:
-  publish:
+  # The export installs packages, so the build holds no write permission and
+  # only the deploy job can publish.
+  build:
     runs-on: ubuntu-24.04
-    environment:
-      name: github-pages
-      url: ${{ steps.deployment.outputs.page_url }}
+    permissions:
+      contents: read
     steps:
-      - uses: actions/checkout@v5
+      - uses: actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803 # v6.1.0
+        with:
+          persist-credentials: false
 
       # docs/ is the workspace: its README.md becomes the site index and
       # docs/.glyph/site.json carries the site title. Everything the site
       # needs lives inside docs/, so nothing outside it leaks into the export.
+      # Our own action stays on its rolling v1 tag, so the docs always render
+      # with the latest Glyph release.
       - uses: glyph-md/export-website-action@v1
         with:
           workspace: docs
           output: site
 
-      - uses: actions/upload-pages-artifact@v4
+      - uses: actions/upload-pages-artifact@fc324d3547104276b827a68afc52ff2a11cc49c9 # v5.0.0
         with:
           path: site
 
+  deploy:
+    needs: build
+    runs-on: ubuntu-24.04
+    permissions:
+      pages: write
+      id-token: write
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    steps:
       - id: deployment
-        uses: actions/deploy-pages@v4
+        uses: actions/deploy-pages@368f82528645a54fb793d4d04e342629a3f51346 # v5.0.1

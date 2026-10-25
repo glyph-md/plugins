@@ -5,14 +5,19 @@ on:
     branches: [main]
   pull_request:
 
-permissions:
-  contents: write
+permissions: {}
 
 jobs:
+  # npx downloads and runs ajv-cli, so this job holds no write permission. On
+  # main, publish-index below commits what the generator produces.
   validate:
     runs-on: ubuntu-24.04
+    permissions:
+      contents: read
     steps:
-      - uses: actions/checkout@v5
+      - uses: actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803 # v6.1.0
+        with:
+          persist-credentials: false
 
       - name: Validate every plugin registration
         run: |
@@ -21,7 +26,7 @@ jobs:
             id=$(basename "$dir")
             test -f "$dir/plugin.json" || { echo "$id: missing plugin.json"; exit 1; }
             test -f "$dir/README.md" || { echo "$id: missing README.md (the catalog page)"; exit 1; }
-            npx --yes ajv-cli@5 validate -s plugin.schema.json -d "$dir/plugin.json" --strict=false
+            npx --yes ajv-cli@5.0.0 validate -s plugin.schema.json -d "$dir/plugin.json" --strict=false
           done
 
       # The registration is what the marketplace publishes; the manifest is what
@@ -51,10 +56,27 @@ jobs:
         run: node scripts/build-index.mjs
 
       - name: Validate the generated index against its schema
-        run: npx --yes ajv-cli@5 validate -s index.schema.json -d index.json --strict=false
+        run: npx --yes ajv-cli@5.0.0 validate -s index.schema.json -d index.json --strict=false
 
-      - name: Commit regenerated files on main
-        if: github.event_name == 'push' && github.ref == 'refs/heads/main'
+  # Runs only this repo's scripts, which use nothing outside Node's standard
+  # library, so the write token never shares a job with a downloaded package.
+  publish-index:
+    needs: validate
+    if: github.event_name == 'push' && github.ref == 'refs/heads/main'
+    runs-on: ubuntu-24.04
+    permissions:
+      contents: write
+    steps:
+      - uses: actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803 # v6.1.0
+        with:
+          persist-credentials: false
+
+      - name: Generate index.json and the catalog
+        run: node scripts/build-index.mjs
+
+      - name: Commit regenerated files
+        env:
+          GITHUB_TOKEN: ${{ github.token }}
         run: |
           if git diff --quiet -- index.json index docs/plugin-catalog.md; then
             echo "generated files already current"
@@ -64,4 +86,4 @@ jobs:
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
           git add index.json index docs/plugin-catalog.md
           git commit -m "chore: regenerate index and catalog"
-          git push
+          git push "https://x-access-token:${GITHUB_TOKEN}@github.com/${GITHUB_REPOSITORY}.git" HEAD:main
