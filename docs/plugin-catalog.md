@@ -20,6 +20,14 @@ Present a document as slides, or export it as a reveal.js deck. Horizontal rules
 
 Persian (Farsi) spell-check dictionary, based on the Lilak project.
 
+## Markdown
+
+### [Excalidraw](https://github.com/glyph-md/plugins/tree/main/plugins/com.glyph.excalidraw)
+
+`com.glyph.excalidraw` v1.0.0 · official · full trust · no permissions
+
+View and edit Excalidraw drawings: .excalidraw files, excalidraw code blocks, and Obsidian Excalidraw notes.
+
 ## Tools
 
 ### [Hello Status](https://github.com/glyph-md/plugins/tree/main/plugins/com.glyph.hello-status)

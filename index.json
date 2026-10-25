@@ -19,6 +19,26 @@
       "sha256": "1dd766472ed6a253cc1c1937f8d4fa325558f4d4beb6c807d2f45ca0d3b26658"
     },
     {
+      "id": "com.glyph.excalidraw",
+      "name": "Excalidraw",
+      "description": "View and edit Excalidraw drawings: .excalidraw files, excalidraw code blocks, and Obsidian Excalidraw notes.",
+      "version": "1.0.0",
+      "apiVersion": "0.26.0",
+      "category": "markdown",
+      "keywords": [
+        "excalidraw",
+        "drawing",
+        "sketch",
+        "whiteboard",
+        "diagram",
+        "obsidian"
+      ],
+      "official": true,
+      "sandbox": false,
+      "packageUrl": "https://github.com/glyph-md/plugins/releases/download/com.glyph.excalidraw-v1.0.0/com.glyph.excalidraw.zip",
+      "sha256": "0000000000000000000000000000000000000000000000000000000000000000"
+    },
+    {
       "id": "com.glyph.hello-status",
       "name": "Hello Status",
       "description": "Sample plugin: a status bar greeting and a command palette entry.",
