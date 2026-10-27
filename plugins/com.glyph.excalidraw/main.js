@@ -218,20 +218,20 @@ function loadLibrary(ctx) {
   return library;
 }
 
-// Rendered SVG keyed by theme and scene, so a re-render (scroll, tab switch,
-// an edit elsewhere in the note) skips the export. Bounded like an LRU.
+// Rendered SVG keyed by theme, background, and scene, so a re-render (scroll,
+// tab switch, an edit elsewhere in the note) skips the export. Bounded like an LRU.
 const svgCache = new Map();
 const SVG_CACHE_LIMIT = 50;
 
-function renderSvg(lib, scene, dark) {
-  const key = `${dark ? "dark" : "light"}:${scene}`;
+function renderSvg(lib, scene, dark, background = false) {
+  const key = `${dark ? "dark" : "light"}:${background ? "canvas" : "clear"}:${scene}`;
   const cached = svgCache.get(key);
   if (cached) {
     svgCache.delete(key);
     svgCache.set(key, cached);
     return cached;
   }
-  const pending = lib.sceneToSvg(scene, dark);
+  const pending = lib.sceneToSvg(scene, dark, background);
   pending.catch(() => {
     if (svgCache.get(key) === pending) svgCache.delete(key);
   });
@@ -347,7 +347,6 @@ function createRenderer(ctx, format) {
       edit.type = "button";
       edit.className = "excalidraw-edit";
 
-      let svg = "";
       // The scene JSON on screen, "" for an empty drawing, null when it failed.
       let scene = null;
       let dark = isDark();
@@ -378,7 +377,6 @@ function createRenderer(ctx, format) {
           const rendered = await renderSvg(lib, decoded, dark);
           if (seq !== renderSeq) return;
           scene = decoded;
-          svg = rendered;
           drawing.innerHTML = rendered;
           show(rendered === "" ? empty : drawing, true);
         } catch {
@@ -400,7 +398,17 @@ function createRenderer(ctx, format) {
       };
 
       if (openLightbox) {
-        const zoom = () => openLightbox(svgToDataUrl(svg), t("label"));
+        // The inline render is transparent and the lightbox backdrop dark, so
+        // the zoomed copy carries the scene's own canvas color behind it.
+        const zoom = async () => {
+          if (!scene) return;
+          try {
+            const lib = await loadLibrary(ctx);
+            openLightbox(svgToDataUrl(await renderSvg(lib, scene, dark, true)), t("label"));
+          } catch (err) {
+            console.error("The Excalidraw drawing could not be zoomed:", err);
+          }
+        };
         drawing.setAttribute("role", "button");
         drawing.tabIndex = 0;
         drawing.addEventListener("click", zoom);

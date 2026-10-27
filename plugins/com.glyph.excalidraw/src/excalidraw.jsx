@@ -78,14 +78,18 @@ function inlineSymbols(svg) {
   for (const symbol of svg.querySelectorAll("symbol")) symbol.remove();
 }
 
-/** The drawing as sanitized SVG markup on a transparent background, "" when it has nothing in it. */
-export async function sceneToSvg(text, dark) {
+/**
+ * The drawing as sanitized SVG markup, "" when it has nothing in it. Without
+ * `background` it is transparent, to sit on the page; with it, the scene's own
+ * canvas color is drawn behind it.
+ */
+export async function sceneToSvg(text, dark, background = false) {
   const { elements, appState, files } = parseScene(text);
   const visible = elements.filter((element) => !element.isDeleted);
   if (visible.length === 0) return "";
   const svg = await exportToSvg({
     elements: visible,
-    appState: { ...appState, exportBackground: false, exportWithDarkMode: dark },
+    appState: { ...appState, exportBackground: background, exportWithDarkMode: dark },
     files,
     exportPadding: 10,
   });
