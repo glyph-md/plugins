@@ -196,9 +196,9 @@ ctx.ui.addColorScheme({
 - Only the scheme the user picks is in the document, injected after the app's styles and before `ctx.ui.addStyles` sheets. Picking one recolors the app, the graph view, and the HTML, EPUB, and website exports.
 - Ids are scoped to your plugin, so two plugins may both offer `ocean`. The app stores the user's pick as your plugin id plus the scheme id.
 - When your plugin is turned off or uninstalled, the app falls back to its default colors and keeps the user's pick; the picker shows it as unavailable and names your plugin, and turning the plugin back on restores the scheme.
-- To rename a scheme (for example on `ctx.i18n.onLanguageChange`), register it again with the same id before disposing the old one; the newest registration wins, and the user's pick stays applied throughout.
+- To rename a scheme (for example on `ctx.i18n.onLanguageChange`, so for a `"sandbox": false` plugin), register it again with the same id before disposing the old one; the newest registration wins, and the user's pick stays applied throughout.
 - Throws when `id` or `label` is not a non-empty string or `css` is not a string.
-- Available in the sandbox. There a scheme whose CSS references a URL (`url()`, `image-set()`, `@import`) is dropped with a console error, as sandboxed `ctx.ui.addStyles` sheets are.
+- Available in the sandbox. There a malformed scheme, or one whose CSS references a URL (`url()`, `image-set()`, `@import`), is dropped with a console error instead, as sandboxed `ctx.ui.addStyles` sheets are.
 
 ## `ctx.settings`
 
