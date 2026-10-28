@@ -1,4 +1,4 @@
-# API Reference (0.26.0)
+# API Reference (0.28.0)
 
 A plugin default-exports `{ activate(ctx), deactivate? }`. `activate` receives the **plugin context** (`ctx`), the only door to the host. Every `register*` call returns a **disposer** and is also auto-removed on unload, so you rarely call disposers yourself.
 
@@ -172,11 +172,33 @@ const close = ctx.ui.openOverlay({
 
 ## `ctx.ui.addStyles`
 
-Inject a stylesheet after the app's own styles (plugin rules win ties). Removed automatically on unload. This is how custom CSS and theme plugins work.
+Inject a stylesheet after the app's own styles (plugin rules win ties). Removed automatically on unload. This is how custom CSS works; a color scheme the user should be able to pick goes through `ctx.ui.addColorScheme`.
 
 ```ts
 ctx.ui.addStyles(".markdown-body { letter-spacing: 0.01em }");
 ```
+
+## `ctx.ui.addColorScheme` (API 0.28)
+
+Offer a color scheme in the **Settings > Appearance** picker, next to Light and Dark. The CSS sets the app's color tokens (`--color-surface`, `--color-text-primary`, `--color-accent`, and the rest) on `:root` for the light theme and `:root.dark` for the dark one; set every token the app's own themes set, or the rest keep the default palette's values.
+
+```ts
+ctx.ui.addColorScheme({
+  id: "ocean",
+  label: "Ocean",
+  css: `
+    :root { --color-surface: #f3f8fb; --color-accent: #1f6feb; }
+    :root.dark { --color-surface: #0b1622; --color-accent: #58a6ff; }
+  `,
+});
+```
+
+- Only the scheme the user picks is in the document, injected after the app's styles and before `ctx.ui.addStyles` sheets. Picking one recolors the app, the graph view, and the HTML, EPUB, and website exports.
+- Ids are scoped to your plugin, so two plugins may both offer `ocean`. The app stores the user's pick as your plugin id plus the scheme id.
+- When your plugin is turned off or uninstalled, the app falls back to its default colors and keeps the user's pick; the picker shows it as unavailable and names your plugin, and turning the plugin back on restores the scheme.
+- To rename a scheme (for example on `ctx.i18n.onLanguageChange`), register it again with the same id before disposing the old one; the newest registration wins, and the user's pick stays applied throughout.
+- Throws when `id` or `label` is not a non-empty string or `css` is not a string.
+- Available in the sandbox. There a scheme whose CSS references a URL (`url()`, `image-set()`, `@import`) is dropped with a console error, as sandboxed `ctx.ui.addStyles` sheets are.
 
 ## `ctx.settings`
 
@@ -441,7 +463,7 @@ Inside the sandbox:
 
 - There is no DOM and no Tauri access; the plugin talks to the host only through the plugin API.
 - `fetch` works only for hosts covered by your `network:<host>` permissions (the exact host or a subdomain of it). `XMLHttpRequest`, `WebSocket`, and `importScripts` are removed.
-- The available API subset is: `ctx.commands`, `ctx.ui.addStyles`, `ctx.exporters`, `ctx.documents`, `ctx.workspace` (still requires `workspace:read`), `ctx.assets`, `ctx.spellcheck`, `ctx.settings`, `ctx.notify`, and `ctx.registerTranslations`.
+- The available API subset is: `ctx.commands`, `ctx.ui.addStyles`, `ctx.ui.addColorScheme`, `ctx.exporters`, `ctx.documents`, `ctx.workspace` (still requires `workspace:read`), `ctx.assets`, `ctx.spellcheck`, `ctx.settings`, `ctx.notify`, and `ctx.registerTranslations`.
 - Not available: `ctx.i18n`, which needs the app's strings.
 - Not available: `ctx.markdown` and the DOM-mount APIs (`addStatusBarItem`, `addSidebarPanel`, `addSettingsPanel`, `addWorkspaceSettingsPanel`, `openOverlay`), because they cannot cross the worker boundary.
 - Not available: `ctx.documents.getRenderedHtml`, so a sandboxed plugin reads document content only from an export the user runs.
