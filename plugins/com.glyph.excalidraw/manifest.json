@@ -1,0 +1,11 @@
+{
+  "id": "com.glyph.excalidraw",
+  "name": "Excalidraw",
+  "description": "View and edit Excalidraw drawings: .excalidraw files, excalidraw code blocks, and Obsidian Excalidraw notes.",
+  "version": "1.0.0",
+  "apiVersion": "0.26.0",
+  "main": "main.js",
+  "sandbox": false,
+  "files": ["main.js", "assets/excalidraw.js", "LICENSE"],
+  "permissions": []
+}
