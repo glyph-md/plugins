@@ -72,9 +72,28 @@ export default {
 };
 ```
 
+## Color scheme
+
+A palette the user picks in **Settings > Appearance**. Set the app's color tokens for both themes; only the picked scheme is applied.
+
+```js
+export default {
+  activate(ctx) {
+    ctx.ui.addColorScheme({
+      id: "ocean",
+      label: "Ocean",
+      css: `
+        :root { --color-surface: #f3f8fb; --color-accent: #1f6feb; }
+        :root.dark { --color-surface: #0b1622; --color-accent: #58a6ff; }
+      `,
+    });
+  },
+};
+```
+
 ## Injected styles
 
-Theme tweaks and custom CSS ship as plugins; styles are removed on unload.
+Style tweaks and custom CSS ship as plugins; styles are removed on unload.
 
 ```js
 export default {
