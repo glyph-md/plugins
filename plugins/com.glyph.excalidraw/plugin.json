@@ -1,0 +1,21 @@
+{
+  "$schema": "../../plugin.schema.json",
+  "id": "com.glyph.excalidraw",
+  "name": "Excalidraw",
+  "description": "View and edit Excalidraw drawings: .excalidraw files, excalidraw code blocks, and Obsidian Excalidraw notes.",
+  "version": "1.0.0",
+  "apiVersion": "0.26.0",
+  "category": "markdown",
+  "keywords": [
+    "excalidraw",
+    "drawing",
+    "sketch",
+    "whiteboard",
+    "diagram",
+    "obsidian"
+  ],
+  "official": true,
+  "sandbox": false,
+  "packageUrl": "https://github.com/glyph-md/plugins/releases/download/com.glyph.excalidraw-v1.0.0/com.glyph.excalidraw.zip",
+  "sha256": "0000000000000000000000000000000000000000000000000000000000000000"
+}
