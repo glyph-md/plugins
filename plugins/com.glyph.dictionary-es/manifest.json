@@ -1,0 +1,10 @@
+{
+  "id": "com.glyph.dictionary-es",
+  "name": "Spanish Dictionary",
+  "description": "Spanish spell-check dictionary, based on RLA-ES.",
+  "version": "1.0.0",
+  "apiVersion": "0.16.0",
+  "main": "main.js",
+  "files": ["main.js", "assets/es.aff", "assets/es.dic", "LICENSE"],
+  "permissions": []
+}

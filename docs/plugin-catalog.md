@@ -14,6 +14,18 @@ Present a document as slides, or export it as a reveal.js deck. Horizontal rules
 
 ## Language
 
+### [German Dictionary](https://github.com/glyph-md/plugins/tree/main/plugins/com.glyph.dictionary-de)
+
+`com.glyph.dictionary-de` v1.0.0 · official · sandboxed · no permissions
+
+German (Germany) spell-check dictionary, based on igerman98.
+
+### [Spanish Dictionary](https://github.com/glyph-md/plugins/tree/main/plugins/com.glyph.dictionary-es)
+
+`com.glyph.dictionary-es` v1.0.0 · official · sandboxed · no permissions
+
+Spanish spell-check dictionary, based on RLA-ES.
+
 ### [Persian Dictionary](https://github.com/glyph-md/plugins/tree/main/plugins/com.glyph.dictionary-fa)
 
 `com.glyph.dictionary-fa` v1.0.0 · official · sandboxed · no permissions
