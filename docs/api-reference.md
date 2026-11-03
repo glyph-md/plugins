@@ -398,7 +398,7 @@ const font = await ctx.assets.readBinary("assets/font.woff2");
 
 ## `ctx.spellcheck`
 
-Contribute a spell-check dictionary; it appears in Settings → Editor's language picker, and `load` runs only when the user first selects the language. Registering an existing code (including the built-in `en`) replaces it; unloading the plugin removes it.
+Contribute a spell-check dictionary; it appears in Settings → Editor's language picker, and `load` runs only when the user first selects the language. Registering an existing code (including `en`, which the English dictionary core plugin registers) replaces it; unloading the plugin removes it and brings back the dictionary it replaced. Since Glyph 0.28.0 the app checks with Hunspell itself, compiled to WebAssembly, so the whole affix format works, compound words included; earlier versions ignored the compound flags. The two texts together may be at most 32 million characters.
 
 ```ts
 ctx.spellcheck.registerDictionary({
