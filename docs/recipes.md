@@ -207,7 +207,7 @@ Add a language to Settings → Editor → Spell Check. Ship the Hunspell files a
   "version": "1.0.0",
   "apiVersion": "0.16.0",
   "main": "main.js",
-  "files": ["main.js", "assets/fa.aff", "assets/fa.dic"],
+  "files": ["main.js", "assets/fa.aff", "assets/fa.dic", "LICENSE"],
   "permissions": []
 }
 ```

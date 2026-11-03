@@ -1,4 +1,5 @@
 {
+  "name": "glyph-plugins-registry",
   "private": true,
   "description": "Test-only dependencies for the registry's own scripts; nothing here ships in a plugin.",
   "devDependencies": {
