@@ -28,7 +28,7 @@ Spanish spell-check dictionary, based on RLA-ES.
 
 ### [Persian Dictionary](https://github.com/glyph-md/plugins/tree/main/plugins/com.glyph.dictionary-fa)
 
-`com.glyph.dictionary-fa` v1.0.0 · official · sandboxed · no permissions
+`com.glyph.dictionary-fa` v1.0.1 · official · sandboxed · no permissions
 
 Persian (Farsi) spell-check dictionary, based on the Lilak project.
 
