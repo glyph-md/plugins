@@ -1,7 +1,9 @@
 // Word lists for the official dictionaries, checked with the engine the app runs
 // them on: Hunspell compiled to WebAssembly, pinned in package.json to the
 // version Glyph ships. A dictionary update that stops accepting common words or
-// stops suggesting the obvious fix fails here before it is released.
+// stops suggesting the obvious fix fails here before it is released. Each one
+// must also list its LICENSE, since the release zip carries only the files its
+// manifest declares and every dictionary's license requires shipping the text.
 import assert from "node:assert/strict";
 import { readFileSync } from "node:fs";
 import { test } from "node:test";
@@ -63,5 +65,12 @@ for (const [language, list] of Object.entries(LISTS)) {
     } finally {
       hunspell.dispose();
     }
+  });
+
+  test(`com.glyph.dictionary-${language} packages its LICENSE`, () => {
+    const manifest = JSON.parse(
+      readFileSync(new URL(`../plugins/com.glyph.dictionary-${language}/manifest.json`, import.meta.url), "utf8"),
+    );
+    assert.ok(manifest.files.includes("LICENSE"), "manifest.json files must list LICENSE");
   });
 }
