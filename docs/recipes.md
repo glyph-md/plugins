@@ -198,7 +198,7 @@ export default {
 
 ## Spell-check dictionary
 
-Add a language to Settings → Editor → Spell Check. Ship the Hunspell files as package assets and read them through `ctx.assets`; `load` is lazy, so nothing is read until the user picks the language. No permissions needed: bundled assets are the plugin's own content.
+Add a language to Settings → Editor → Spell Check. Ship the Hunspell files as package assets and read them through `ctx.assets`; `load` is lazy, so nothing is read until the user picks the language. No permissions needed: bundled assets are the plugin's own content. List the dictionary's license in `files` too, so it ships in the package with the data. A dictionary that builds words from compound flags (German, Dutch, the Nordic languages) declares `"apiVersion": "0.28.0"`: older apps ignore those flags and would underline every compound.
 
 ```json
 {
@@ -207,7 +207,7 @@ Add a language to Settings → Editor → Spell Check. Ship the Hunspell files a
   "version": "1.0.0",
   "apiVersion": "0.16.0",
   "main": "main.js",
-  "files": ["main.js", "assets/fa.aff", "assets/fa.dic"],
+  "files": ["main.js", "assets/fa.aff", "assets/fa.dic", "LICENSE"],
   "permissions": []
 }
 ```

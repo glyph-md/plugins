@@ -1,0 +1,13 @@
+{
+  "$schema": "../../plugin.schema.json",
+  "id": "com.glyph.dictionary-de",
+  "name": "German Dictionary",
+  "description": "German (Germany) spell-check dictionary, based on igerman98.",
+  "version": "1.0.0",
+  "apiVersion": "0.28.0",
+  "category": "language",
+  "keywords": ["spellcheck", "dictionary", "german", "deutsch"],
+  "official": true,
+  "packageUrl": "https://github.com/glyph-md/plugins/releases/download/com.glyph.dictionary-de-v1.0.0/com.glyph.dictionary-de.zip",
+  "sha256": "0000000000000000000000000000000000000000000000000000000000000000"
+}

@@ -1,0 +1,13 @@
+{
+  "$schema": "../../plugin.schema.json",
+  "id": "com.glyph.dictionary-es",
+  "name": "Spanish Dictionary",
+  "description": "Spanish spell-check dictionary, based on RLA-ES.",
+  "version": "1.0.0",
+  "apiVersion": "0.16.0",
+  "category": "language",
+  "keywords": ["spellcheck", "dictionary", "spanish", "español"],
+  "official": true,
+  "packageUrl": "https://github.com/glyph-md/plugins/releases/download/com.glyph.dictionary-es-v1.0.0/com.glyph.dictionary-es.zip",
+  "sha256": "0000000000000000000000000000000000000000000000000000000000000000"
+}

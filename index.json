@@ -2,6 +2,40 @@
   "$schema": "https://raw.githubusercontent.com/glyph-md/plugins/main/index.schema.json",
   "plugins": [
     {
+      "id": "com.glyph.dictionary-de",
+      "name": "German Dictionary",
+      "description": "German (Germany) spell-check dictionary, based on igerman98.",
+      "version": "1.0.0",
+      "apiVersion": "0.28.0",
+      "category": "language",
+      "keywords": [
+        "spellcheck",
+        "dictionary",
+        "german",
+        "deutsch"
+      ],
+      "official": true,
+      "packageUrl": "https://github.com/glyph-md/plugins/releases/download/com.glyph.dictionary-de-v1.0.0/com.glyph.dictionary-de.zip",
+      "sha256": "0000000000000000000000000000000000000000000000000000000000000000"
+    },
+    {
+      "id": "com.glyph.dictionary-es",
+      "name": "Spanish Dictionary",
+      "description": "Spanish spell-check dictionary, based on RLA-ES.",
+      "version": "1.0.0",
+      "apiVersion": "0.16.0",
+      "category": "language",
+      "keywords": [
+        "spellcheck",
+        "dictionary",
+        "spanish",
+        "español"
+      ],
+      "official": true,
+      "packageUrl": "https://github.com/glyph-md/plugins/releases/download/com.glyph.dictionary-es-v1.0.0/com.glyph.dictionary-es.zip",
+      "sha256": "0000000000000000000000000000000000000000000000000000000000000000"
+    },
+    {
       "id": "com.glyph.dictionary-fa",
       "name": "Persian Dictionary",
       "description": "Persian (Farsi) spell-check dictionary, based on the Lilak project.",
