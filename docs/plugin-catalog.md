@@ -16,7 +16,7 @@ Present a document as slides, or export it as a reveal.js deck. Horizontal rules
 
 ### [German Dictionary](https://github.com/glyph-md/plugins/tree/main/plugins/com.glyph.dictionary-de)
 
-`com.glyph.dictionary-de` v1.0.0 · official · sandboxed · no permissions
+`com.glyph.dictionary-de` v1.0.1 · official · sandboxed · no permissions
 
 German (Germany) spell-check dictionary, based on igerman98.
 

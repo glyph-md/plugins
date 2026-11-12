@@ -5,8 +5,8 @@
       "id": "com.glyph.dictionary-de",
       "name": "German Dictionary",
       "description": "German (Germany) spell-check dictionary, based on igerman98.",
-      "version": "1.0.0",
-      "apiVersion": "0.28.0",
+      "version": "1.0.1",
+      "apiVersion": "0.16.0",
       "category": "language",
       "keywords": [
         "spellcheck",
