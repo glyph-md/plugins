@@ -6,8 +6,13 @@
   "version": "1.0.0",
   "apiVersion": "0.28.0",
   "category": "language",
-  "keywords": ["spellcheck", "dictionary", "german", "deutsch"],
+  "keywords": [
+    "spellcheck",
+    "dictionary",
+    "german",
+    "deutsch"
+  ],
   "official": true,
   "packageUrl": "https://github.com/glyph-md/plugins/releases/download/com.glyph.dictionary-de-v1.0.0/com.glyph.dictionary-de.zip",
-  "sha256": "0000000000000000000000000000000000000000000000000000000000000000"
+  "sha256": "9f2bb2db0d7024a1a4d53fd900debf9b181da39430c9b534d50ac7d682ef0bdc"
 }

@@ -6,8 +6,13 @@
   "version": "1.0.0",
   "apiVersion": "0.16.0",
   "category": "language",
-  "keywords": ["spellcheck", "dictionary", "spanish", "español"],
+  "keywords": [
+    "spellcheck",
+    "dictionary",
+    "spanish",
+    "español"
+  ],
   "official": true,
   "packageUrl": "https://github.com/glyph-md/plugins/releases/download/com.glyph.dictionary-es-v1.0.0/com.glyph.dictionary-es.zip",
-  "sha256": "0000000000000000000000000000000000000000000000000000000000000000"
+  "sha256": "b60af25d65aa2b62ea2dfaa9ba3be1c70bcee768fba36a50d74299c9defc0a6e"
 }

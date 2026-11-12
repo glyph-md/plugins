@@ -15,7 +15,7 @@
       ],
       "official": true,
       "packageUrl": "https://github.com/glyph-md/plugins/releases/download/com.glyph.dictionary-de-v1.0.0/com.glyph.dictionary-de.zip",
-      "sha256": "0000000000000000000000000000000000000000000000000000000000000000"
+      "sha256": "9f2bb2db0d7024a1a4d53fd900debf9b181da39430c9b534d50ac7d682ef0bdc"
     },
     {
       "id": "com.glyph.dictionary-es",
@@ -32,7 +32,7 @@
       ],
       "official": true,
       "packageUrl": "https://github.com/glyph-md/plugins/releases/download/com.glyph.dictionary-es-v1.0.0/com.glyph.dictionary-es.zip",
-      "sha256": "0000000000000000000000000000000000000000000000000000000000000000"
+      "sha256": "b60af25d65aa2b62ea2dfaa9ba3be1c70bcee768fba36a50d74299c9defc0a6e"
     },
     {
       "id": "com.glyph.dictionary-fa",
@@ -48,8 +48,8 @@
         "farsi"
       ],
       "official": true,
-      "packageUrl": "https://github.com/glyph-md/plugins/releases/download/com.glyph.dictionary-fa-v1.0.0/com.glyph.dictionary-fa.zip",
-      "sha256": "1dd766472ed6a253cc1c1937f8d4fa325558f4d4beb6c807d2f45ca0d3b26658"
+      "packageUrl": "https://github.com/glyph-md/plugins/releases/download/com.glyph.dictionary-fa-v1.0.1/com.glyph.dictionary-fa.zip",
+      "sha256": "ccdfd3a18726cbc0e83f5946767e4a01b112ce505c1d1b72ce2d611bdf20cfa1"
     }
   ]
 }
