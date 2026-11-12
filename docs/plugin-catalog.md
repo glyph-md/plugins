@@ -32,6 +32,12 @@ Spanish spell-check dictionary, based on RLA-ES.
 
 Persian (Farsi) spell-check dictionary, based on the Lilak project.
 
+### [Hunspell](https://github.com/glyph-md/plugins/tree/main/plugins/com.glyph.hunspell)
+
+`com.glyph.hunspell` v1.0.0 · official · full trust · no permissions
+
+Spell-check with Hunspell, which understands compound words (German) and every rule a Hunspell dictionary can use.
+
 ## Markdown
 
 ### [Excalidraw](https://github.com/glyph-md/plugins/tree/main/plugins/com.glyph.excalidraw)

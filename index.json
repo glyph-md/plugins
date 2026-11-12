@@ -90,6 +90,24 @@
       "sha256": "148af39e4b7d4404bda7f95be495714e341b5c6b0fda3f124cd1df0bf52ee806"
     },
     {
+      "id": "com.glyph.hunspell",
+      "name": "Hunspell",
+      "description": "Spell-check with Hunspell, which understands compound words (German) and every rule a Hunspell dictionary can use.",
+      "version": "1.0.0",
+      "apiVersion": "0.28.0",
+      "category": "language",
+      "keywords": [
+        "spellcheck",
+        "hunspell",
+        "compound",
+        "german"
+      ],
+      "official": true,
+      "sandbox": false,
+      "packageUrl": "https://github.com/glyph-md/plugins/releases/download/com.glyph.hunspell-v1.0.0/com.glyph.hunspell.zip",
+      "sha256": "0000000000000000000000000000000000000000000000000000000000000000"
+    },
+    {
       "id": "com.glyph.slides",
       "name": "Slides",
       "description": "Present a document as slides, or export it as a reveal.js deck. Horizontal rules separate slides.",
