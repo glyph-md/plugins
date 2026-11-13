@@ -1,13 +1,15 @@
-// Word lists for the official dictionaries, checked with the engine the app runs
-// them on: Hunspell compiled to WebAssembly, pinned in package.json to the
-// version Glyph ships. A dictionary update that stops accepting common words or
-// stops suggesting the obvious fix fails here before it is released. Each one
+// Word lists for the official dictionaries, checked with the Hunspell plugin's
+// engine exactly as it ships (its built bundle, WebAssembly and text handling),
+// which German's compound words need. A dictionary update that stops accepting
+// common words or stops suggesting the obvious fix fails here before it is
+// released. Each one
 // must also list its LICENSE, since the release zip carries only the files its
 // manifest declares and every dictionary's license requires shipping the text.
 import assert from "node:assert/strict";
 import { readFileSync } from "node:fs";
 import { test } from "node:test";
-import { createHunspellFromStrings } from "hunspell-wasm";
+import { loadHunspell } from "../plugins/com.glyph.hunspell/assets/hunspell.js";
+import { createChecker } from "../plugins/com.glyph.hunspell/main.js";
 
 const LISTS = {
   de: {
@@ -38,6 +40,10 @@ const LISTS = {
   },
 };
 
+const engine = await loadHunspell(
+  readFileSync(new URL("../plugins/com.glyph.hunspell/assets/hunspell.wasm", import.meta.url)),
+);
+
 function asset(language, extension) {
   const url = new URL(
     `../plugins/com.glyph.dictionary-${language}/assets/${language}.${extension}`,
@@ -48,22 +54,22 @@ function asset(language, extension) {
 
 for (const [language, list] of Object.entries(LISTS)) {
   test(`com.glyph.dictionary-${language} checks and corrects its word list`, async () => {
-    const hunspell = await createHunspellFromStrings(asset(language, "aff"), asset(language, "dic"));
+    const checker = createChecker(engine, asset(language, "aff"), asset(language, "dic"));
     try {
       for (const word of list.correct) {
-        assert.ok(hunspell.testSpelling(word), `${word} should be accepted`);
+        assert.ok(checker.correct(word), `${word} should be accepted`);
       }
       for (const [typo, fix] of Object.entries(list.corrections)) {
-        assert.ok(!hunspell.testSpelling(typo), `${typo} should be flagged`);
-        const suggestions = hunspell.getSpellingSuggestions(typo);
+        assert.ok(!checker.correct(typo), `${typo} should be flagged`);
+        const suggestions = checker.suggest(typo);
         assert.ok(suggestions.includes(fix), `${typo} should suggest ${fix}, got ${suggestions}`);
       }
       for (const typo of list.flagged) {
-        assert.ok(!hunspell.testSpelling(typo), `${typo} should be flagged`);
-        assert.ok(hunspell.getSpellingSuggestions(typo).length > 0, `${typo} has no suggestions`);
+        assert.ok(!checker.correct(typo), `${typo} should be flagged`);
+        assert.ok(checker.suggest(typo).length > 0, `${typo} has no suggestions`);
       }
     } finally {
-      hunspell.dispose();
+      checker.dispose();
     }
   });
 

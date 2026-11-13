@@ -46,4 +46,4 @@ pnpm typecheck && pnpm check && pnpm test
 cd src-tauri && cargo clippy --all-targets -- -D warnings
 ```
 
-Codecov patch coverage must stay green; run `pnpm test:coverage` before pushing. This repo runs `validate.yml` on every PR: schema validation, sorted unique ids, https URLs, and a catalog entry for every published id. It also runs `smoke.yml` (`npm ci --ignore-scripts && node --test` locally): the release scripts end to end, and each official dictionary's word list checked with the app's spell-check engine.
+Codecov patch coverage must stay green; run `pnpm test:coverage` before pushing. This repo runs `validate.yml` on every PR: schema validation, sorted unique ids, https URLs, and a catalog entry for every published id. It also runs `smoke.yml` (`node --test` locally): the release scripts end to end, each official plugin's own tests, and each official dictionary's word list checked with the Hunspell plugin's engine.
