@@ -15,8 +15,8 @@
         "deutsch"
       ],
       "official": true,
-      "packageUrl": "https://github.com/glyph-md/plugins/releases/download/com.glyph.dictionary-de-v1.0.0/com.glyph.dictionary-de.zip",
-      "sha256": "9f2bb2db0d7024a1a4d53fd900debf9b181da39430c9b534d50ac7d682ef0bdc"
+      "packageUrl": "https://github.com/glyph-md/plugins/releases/download/com.glyph.dictionary-de-v1.0.1/com.glyph.dictionary-de.zip",
+      "sha256": "060d4b5fb838ae928d9521fb815d2d4453a5203da55a56e12ebec5acb0e91de1"
     },
     {
       "id": "com.glyph.dictionary-es",
@@ -105,7 +105,7 @@
       "official": true,
       "sandbox": false,
       "packageUrl": "https://github.com/glyph-md/plugins/releases/download/com.glyph.hunspell-v1.0.0/com.glyph.hunspell.zip",
-      "sha256": "0000000000000000000000000000000000000000000000000000000000000000"
+      "sha256": "2d5f6219af0b5c6b9317f6e0fed73345e50cb7758fd2758f146ba10406b06f0b"
     },
     {
       "id": "com.glyph.slides",
