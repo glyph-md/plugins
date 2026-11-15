@@ -1,0 +1,11 @@
+{
+  "id": "com.glyph.hunspell",
+  "name": "Hunspell",
+  "description": "Spell-check with Hunspell, which understands compound words (German) and every rule a Hunspell dictionary can use.",
+  "version": "1.0.0",
+  "apiVersion": "0.28.0",
+  "main": "main.js",
+  "sandbox": false,
+  "files": ["main.js", "assets/hunspell.js", "assets/hunspell.wasm", "LICENSE"],
+  "permissions": []
+}

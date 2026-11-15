@@ -50,6 +50,24 @@
       "official": true,
       "packageUrl": "https://github.com/glyph-md/plugins/releases/download/com.glyph.dictionary-fa-v1.0.1/com.glyph.dictionary-fa.zip",
       "sha256": "ccdfd3a18726cbc0e83f5946767e4a01b112ce505c1d1b72ce2d611bdf20cfa1"
+    },
+    {
+      "id": "com.glyph.hunspell",
+      "name": "Hunspell",
+      "description": "Spell-check with Hunspell, which understands compound words (German) and every rule a Hunspell dictionary can use.",
+      "version": "1.0.0",
+      "apiVersion": "0.28.0",
+      "category": "language",
+      "keywords": [
+        "spellcheck",
+        "hunspell",
+        "compound",
+        "german"
+      ],
+      "official": true,
+      "sandbox": false,
+      "packageUrl": "https://github.com/glyph-md/plugins/releases/download/com.glyph.hunspell-v1.0.0/com.glyph.hunspell.zip",
+      "sha256": "0000000000000000000000000000000000000000000000000000000000000000"
     }
   ]
 }

@@ -198,7 +198,7 @@ export default {
 
 ## Spell-check dictionary
 
-Add a language to Settings → Editor → Spell Check. Ship the Hunspell files as package assets and read them through `ctx.assets`; `load` is lazy, so nothing is read until the user picks the language. No permissions needed: bundled assets are the plugin's own content. List the dictionary's license in `files` too, so it ships in the package with the data. A dictionary that builds words from compound flags (German, Dutch, the Nordic languages) needs a spell-check engine plugin that reads them, so say so in its README: the app's built-in checker ignores those flags and underlines every compound.
+Add a language to Settings → Editor → Spell Check. Ship the Hunspell files as package assets and read them through `ctx.assets`; `load` is lazy, so nothing is read until the user picks the language. No permissions needed: bundled assets are the plugin's own content. List the dictionary's license in `files` too, so it ships in the package with the data. A dictionary that builds words from compound flags (German, Dutch, the Nordic languages) needs a spell-check engine plugin that reads them, such as [Hunspell](https://github.com/glyph-md/plugins/tree/main/plugins/com.glyph.hunspell), so say so in its README: the app's built-in checker ignores those flags and underlines every compound.
 
 ```json
 {

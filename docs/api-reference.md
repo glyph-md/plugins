@@ -398,7 +398,7 @@ const font = await ctx.assets.readBinary("assets/font.woff2");
 
 ## `ctx.spellcheck`
 
-Contribute a spell-check dictionary; it appears in Settings → Editor's language picker, and `load` runs only when the user first selects the language. Registering an existing code (including `en`, which the English dictionary core plugin registers) replaces it; unloading the plugin removes it and brings back the dictionary it replaced. The app's built-in checker reads the common Hunspell rules but not compounding; a spell-check engine plugin (below) can check every dictionary with Hunspell itself, compound words included. The two texts together may be at most 32 million characters.
+Contribute a spell-check dictionary; it appears in Settings → Editor's language picker, and `load` runs only when the user first selects the language. Registering an existing code (including `en`, which the English dictionary core plugin registers) replaces it; unloading the plugin removes it and brings back the dictionary it replaced. The app's built-in checker reads the common Hunspell rules but not compounding; the [Hunspell plugin](https://github.com/glyph-md/plugins/tree/main/plugins/com.glyph.hunspell), a spell-check engine (below), checks every dictionary with Hunspell itself, compound words included. The two texts together may be at most 32 million characters.
 
 ```ts
 ctx.spellcheck.registerDictionary({
@@ -414,7 +414,7 @@ The optional `scripts` field declares the ISO 15924 script codes the dictionary 
 
 ### `ctx.spellcheck.registerEngine` (API 0.28)
 
-Replace the engine every dictionary is checked with. `create(aff, dic)` receives a dictionary's text once it has passed the size check and returns a new checker for it. The app rebuilds every open dictionary with a newly registered engine, and unloading the plugin frees what it built and brings back the previous engine, or the built-in checker when there is none. The app owns each checker: it calls the optional `dispose` once the checker's dictionary or the engine is replaced, and never calls that checker again. A checker that throws is freed and stops checking its language. Only a plugin with `"sandbox": false` can register an engine: the editor checks each word as it paints and cannot wait on a worker.
+Replace the engine every dictionary is checked with. `create(aff, dic)` receives a dictionary's text once it has passed the size check and returns a new checker for it. The app rebuilds every open dictionary with a newly registered engine, and unloading the plugin frees what it built and brings back the previous engine, or the built-in checker when there is none. The app owns each checker: it calls the optional `dispose` once the checker's dictionary or the engine is replaced, and never calls that checker again. A checker that throws is freed and stops checking its language. Only a plugin with `"sandbox": false` can register an engine: the editor checks each word as it paints and cannot wait on a worker. The [Hunspell plugin](https://github.com/glyph-md/plugins/tree/main/plugins/com.glyph.hunspell) is the official one.
 
 ```js
 ctx.spellcheck.registerEngine({
