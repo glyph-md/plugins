@@ -398,7 +398,7 @@ const font = await ctx.assets.readBinary("assets/font.woff2");
 
 ## `ctx.spellcheck`
 
-Contribute a spell-check dictionary; it appears in Settings → Editor's language picker, and `load` runs only when the user first selects the language. Registering an existing code (including `en`, which the English dictionary core plugin registers) replaces it; unloading the plugin removes it and brings back the dictionary it replaced. Since Glyph 0.28.0 the app checks with Hunspell itself, compiled to WebAssembly, so the whole affix format works, compound words included; earlier versions ignored the compound flags. The two texts together may be at most 32 million characters.
+Contribute a spell-check dictionary; it appears in Settings → Editor's language picker, and `load` runs only when the user first selects the language. Registering an existing code (including `en`, which the English dictionary core plugin registers) replaces it; unloading the plugin removes it and brings back the dictionary it replaced. The app's built-in checker reads the common Hunspell rules but not compounding; a spell-check engine plugin (below) can check every dictionary with Hunspell itself, compound words included. The two texts together may be at most 32 million characters.
 
 ```ts
 ctx.spellcheck.registerDictionary({
@@ -411,6 +411,24 @@ ctx.spellcheck.registerDictionary({
 Real dictionaries are megabytes of Hunspell text; ship them as package assets and read them with `ctx.assets` (see the [recipe](recipes.md#spell-check-dictionary)) rather than embedding them in `main.js`. The app takes the text as already decoded and ignores the affix file's `SET` line, and `ctx.assets.readText` decodes UTF-8, so convert an ISO-8859 dictionary to UTF-8 first (or read it with `readBinary` and decode it with its own charset).
 
 The optional `scripts` field declares the ISO 15924 script codes the dictionary covers, e.g. `scripts: ["Arab"]`. When omitted the host infers it from `language` via CLDR likely-subtags, so `fa` already covers Arabic-script words. Words are checked only against dictionaries covering their script and skipped entirely when no enabled dictionary does, which keeps mixed-language notes clean. Casing is normalized, composite codes (`Jpan`, `Kore`, `Hans`, `Hant`) expand to their constituent scripts, and an unknown name logs a warning and contributes no coverage. Hosts that predate the field ignore it and infer instead, so declaring it is always safe.
+
+### `ctx.spellcheck.registerEngine` (API 0.28)
+
+Replace the engine every dictionary is checked with. `create(aff, dic)` receives a dictionary's text once it has passed the size check and returns a new checker for it. The app rebuilds every open dictionary with a newly registered engine, and unloading the plugin frees what it built and brings back the previous engine, or the built-in checker when there is none. The app owns each checker: it calls the optional `dispose` once the checker's dictionary or the engine is replaced, and never calls that checker again. A checker that throws is freed and stops checking its language. Only a plugin with `"sandbox": false` can register an engine: the editor checks each word as it paints and cannot wait on a worker.
+
+```js
+ctx.spellcheck.registerEngine({
+  async create(aff, dic) {
+    const speller = await buildSpeller(aff, dic);
+    return {
+      correct: (word) => speller.check(word),
+      suggest: (word) => speller.suggestions(word),
+      add: (word) => speller.addWord(word),
+      dispose: () => speller.free(),
+    };
+  },
+});
+```
 
 ## `ctx.notify`
 
@@ -464,10 +482,11 @@ Inside the sandbox:
 
 - There is no DOM and no Tauri access; the plugin talks to the host only through the plugin API.
 - `fetch` works only for hosts covered by your `network:<host>` permissions (the exact host or a subdomain of it). `XMLHttpRequest`, `WebSocket`, and `importScripts` are removed.
-- The available API subset is: `ctx.commands`, `ctx.ui.addStyles`, `ctx.ui.addColorScheme`, `ctx.exporters`, `ctx.documents`, `ctx.workspace` (still requires `workspace:read`), `ctx.assets`, `ctx.spellcheck`, `ctx.settings`, `ctx.notify`, and `ctx.registerTranslations`.
+- The available API subset is: `ctx.commands`, `ctx.ui.addStyles`, `ctx.ui.addColorScheme`, `ctx.exporters`, `ctx.documents`, `ctx.workspace` (still requires `workspace:read`), `ctx.assets`, `ctx.spellcheck.registerDictionary`, `ctx.settings`, `ctx.notify`, and `ctx.registerTranslations`.
 - Not available: `ctx.i18n`, which needs the app's strings.
 - Not available: `ctx.markdown` and the DOM-mount APIs (`addStatusBarItem`, `addSidebarPanel`, `addSettingsPanel`, `addWorkspaceSettingsPanel`, `openOverlay`), because they cannot cross the worker boundary.
 - Not available: `ctx.documents.getRenderedHtml`, so a sandboxed plugin reads document content only from an export the user runs.
+- Not available: `ctx.spellcheck.registerEngine`, because the editor checks each word as it paints and cannot wait on a worker.
 - Not available: the app state APIs (`ctx.ui.filterFileTree`, `ctx.documents.getActive` and `onActiveChange`, `ctx.workspace.getRoot` and `onChange`, `ctx.vault`, `ctx.navigation`) and workspace writes and settings (`ctx.workspace.createFile`, `getSettings`, and `setSettings`). Calling one throws an error that names it.
 
 Prefer the sandbox (the default) when your plugin needs network access or doesn't touch the UI; users can trust it with less.
